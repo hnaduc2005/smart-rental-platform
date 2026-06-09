@@ -1,0 +1,23 @@
+{
+  "name": "smart-rental-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Smart rental room management platform monorepo.",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --if-present dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "db:generate": "pnpm --filter @smart-rental/database prisma:generate",
+    "db:migrate": "pnpm --filter @smart-rental/database prisma:migrate:dev",
+    "db:studio": "pnpm --filter @smart-rental/database prisma:studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

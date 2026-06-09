@@ -1,0 +1,601 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  LANDLORD
+  SEEKER
+  TENANT
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  LOCKED
+  SUSPENDED
+  DELETED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  DEPOSITED
+  RENTED
+  MAINTENANCE
+  HIDDEN
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum RentalRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  TERMINATED
+  EXPIRED
+}
+
+enum DepositStatus {
+  NONE
+  PENDING_CONFIRMATION
+  PAID
+  REFUNDED
+  FORFEITED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PENDING_CONFIRMATION
+  PAID
+  OVERDUE
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+}
+
+enum IssueType {
+  ELECTRICITY
+  WATER
+  INTERNET
+  SANITATION
+  SECURITY
+  EQUIPMENT
+  OTHER
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  phone     String?    @unique
+  passwordHash String?
+  fullName  String?
+  avatarUrl String?
+  role      Role       @default(SEEKER)
+  status    UserStatus @default(PENDING)
+
+  landlordProfile      LandlordProfile?
+  tenantProfile        TenantProfile?
+  viewingAppointments  ViewingAppointment[] @relation("ViewingAppointmentSeeker")
+  rentalRequests       RentalRequest[]       @relation("RentalRequestSeeker")
+  notifications        Notification[]
+  createdServicePlans  ServicePackage[]      @relation("ServicePackageCreatedBy")
+
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model LandlordProfile {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  publicDisplayName  String?
+  publicPhone        String?
+  publicEmail        String?
+  businessName       String?
+  verificationNote   String?
+
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties    Property[]
+  contracts     Contract[]
+  reviews       Review[]
+  subscriptions LandlordSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TenantProfile {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  identityNumber  String?
+  emergencyName   String?
+  emergencyPhone  String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contracts    Contract[]
+  payments     Payment[]
+  issueReports IssueReport[]
+  reviews      Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Property {
+  id          String  @id @default(cuid())
+  landlordId  String
+  regionId    String?
+  name        String
+  address     String
+  description String?
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+
+  landlord LandlordProfile @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  region   Region?         @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  rooms    Room[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([landlordId])
+  @@index([regionId])
+}
+
+model Room {
+  id                String     @id @default(cuid())
+  propertyId        String
+  roomTypeId        String?
+  regionId          String?
+  name              String
+  description       String?
+  price             Decimal    @db.Decimal(12, 2)
+  area              Decimal?   @db.Decimal(8, 2)
+  address           String?
+  rules             String?
+  maxOccupants      Int
+  status            RoomStatus @default(AVAILABLE)
+  publicContactName String?
+  publicContactPhone String?
+  latitude          Decimal?   @db.Decimal(10, 7)
+  longitude         Decimal?   @db.Decimal(10, 7)
+
+  property            Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomType            RoomType?            @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
+  region              Region?              @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  images              RoomImage[]
+  amenities           RoomAmenity[]
+  viewingAppointments ViewingAppointment[]
+  rentalRequests      RentalRequest[]
+  contracts           Contract[]           @relation("RoomContracts")
+  activeContract      Contract?            @relation("ActiveRoomContract")
+  meterReadings       MeterReading[]
+  issueReports        IssueReport[]
+  reviews             Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([roomTypeId])
+  @@index([regionId])
+  @@index([status])
+}
+
+model RoomImage {
+  id        String   @id @default(cuid())
+  roomId    String
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([roomId])
+}
+
+model Amenity {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String?
+  rooms       RoomAmenity[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model RoomAmenity {
+  roomId    String
+  amenityId String
+  room      Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, amenityId])
+}
+
+model RoomType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  rooms       Room[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Region {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  parentId  String?
+  parent    Region?  @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Region[] @relation("RegionHierarchy")
+  properties Property[]
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model ViewingAppointment {
+  id          String            @id @default(cuid())
+  roomId      String
+  seekerId    String
+  scheduledAt DateTime
+  status      AppointmentStatus @default(REQUESTED)
+  note        String?
+
+  room   Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  seeker User @relation("ViewingAppointmentSeeker", fields: [seekerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId])
+  @@index([seekerId])
+  @@index([status])
+}
+
+model RentalRequest {
+  id         String              @id @default(cuid())
+  roomId     String
+  seekerId   String
+  status     RentalRequestStatus @default(PENDING)
+  message    String?
+  approvedAt DateTime?
+
+  room     Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  seeker   User      @relation("RentalRequestSeeker", fields: [seekerId], references: [id], onDelete: Cascade)
+  deposits Deposit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId])
+  @@index([seekerId])
+  @@index([status])
+}
+
+model Contract {
+  id              String         @id @default(cuid())
+  code            String?        @unique
+  roomId          String
+  activeRoomId    String?        @unique
+  tenantProfileId String
+  landlordId      String
+  startDate       DateTime
+  endDate         DateTime?
+  rentAmount      Decimal        @db.Decimal(12, 2)
+  depositAmount   Decimal?       @db.Decimal(12, 2)
+  paymentDueDay   Int?
+  status          ContractStatus @default(DRAFT)
+  signedOfflineAt DateTime?
+  notes           String?
+
+  room            Room            @relation("RoomContracts", fields: [roomId], references: [id], onDelete: Cascade)
+  activeRoom      Room?           @relation("ActiveRoomContract", fields: [activeRoomId], references: [id], onDelete: SetNull)
+  tenantProfile   TenantProfile   @relation(fields: [tenantProfileId], references: [id], onDelete: Cascade)
+  landlord        LandlordProfile @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  coTenants       CoTenant[]
+  deposits        Deposit[]
+  invoices        Invoice[]
+  meterReadings   MeterReading[]
+  issueReports    IssueReport[]
+  reviews         Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId, status])
+  @@index([tenantProfileId, status])
+  @@index([landlordId, status])
+}
+
+model CoTenant {
+  id             String    @id @default(cuid())
+  contractId     String
+  fullName       String
+  phone          String?
+  identityNumber String?
+  dateOfBirth    DateTime?
+  relationship   String?
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractId])
+}
+
+model Deposit {
+  id              String        @id @default(cuid())
+  rentalRequestId String?
+  contractId      String?
+  amount          Decimal       @db.Decimal(12, 2)
+  status          DepositStatus @default(PENDING_CONFIRMATION)
+  proofImageUrl   String?
+  confirmedAt     DateTime?
+  rejectedReason  String?
+
+  rentalRequest RentalRequest? @relation(fields: [rentalRequestId], references: [id], onDelete: SetNull)
+  contract      Contract?      @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rentalRequestId])
+  @@index([contractId])
+  @@index([status])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  contractId    String
+  billingMonth  DateTime
+  dueDate       DateTime
+  status        InvoiceStatus @default(UNPAID)
+  roomAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  electricAmount Decimal      @default(0) @db.Decimal(12, 2)
+  waterAmount   Decimal       @default(0) @db.Decimal(12, 2)
+  serviceAmount Decimal       @default(0) @db.Decimal(12, 2)
+  totalAmount   Decimal       @default(0) @db.Decimal(12, 2)
+
+  contract      Contract       @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  items         InvoiceItem[]
+  meterReadings MeterReading[]
+  payments      Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contractId, billingMonth])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  label       String
+  quantity    Decimal? @db.Decimal(12, 2)
+  unitPrice   Decimal? @db.Decimal(12, 2)
+  amount      Decimal  @db.Decimal(12, 2)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+}
+
+model MeterReading {
+  id            String   @id @default(cuid())
+  roomId        String
+  contractId    String?
+  invoiceId     String?
+  readingType   String
+  previousValue Decimal? @db.Decimal(12, 2)
+  currentValue  Decimal  @db.Decimal(12, 2)
+  unitPrice     Decimal? @db.Decimal(12, 2)
+  imageUrl      String?
+
+  room     Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId])
+  @@index([contractId])
+  @@index([invoiceId])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  invoiceId       String
+  tenantProfileId String?
+  paymentMethodId String?
+  amount          Decimal       @db.Decimal(12, 2)
+  status          PaymentStatus @default(PENDING)
+  paidAt          DateTime?
+  proofImageUrl   String?
+  confirmedAt     DateTime?
+  rejectedReason  String?
+
+  invoice       Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tenantProfile TenantProfile? @relation(fields: [tenantProfileId], references: [id], onDelete: SetNull)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@index([tenantProfileId])
+  @@index([paymentMethodId])
+  @@index([status])
+}
+
+model IssueReport {
+  id              String      @id @default(cuid())
+  tenantProfileId String
+  roomId          String
+  contractId      String?
+  type            IssueType
+  status          IssueStatus @default(OPEN)
+  title           String
+  description     String?
+  resolutionNote  String?
+  resolvedAt      DateTime?
+
+  tenantProfile TenantProfile @relation(fields: [tenantProfileId], references: [id], onDelete: Cascade)
+  room          Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  contract      Contract?     @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantProfileId])
+  @@index([roomId])
+  @@index([contractId])
+  @@index([status])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  metadata  Json?
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([readAt])
+}
+
+model Review {
+  id              String  @id @default(cuid())
+  tenantProfileId String
+  roomId          String
+  landlordId      String
+  contractId      String?
+  rating          Int
+  comment         String?
+
+  tenantProfile TenantProfile   @relation(fields: [tenantProfileId], references: [id], onDelete: Cascade)
+  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  landlord      LandlordProfile @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  contract      Contract?       @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantProfileId, roomId, contractId])
+  @@index([roomId])
+  @@index([landlordId])
+}
+
+model ServicePackage {
+  id               String  @id @default(cuid())
+  createdByAdminId String?
+  name             String
+  description      String?
+  durationDays     Int
+  maxRoomPosts     Int?
+  maxRooms         Int?
+  price            Decimal @db.Decimal(12, 2)
+  isActive         Boolean @default(true)
+
+  createdByAdmin User?                  @relation("ServicePackageCreatedBy", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  subscriptions  LandlordSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdByAdminId])
+  @@index([isActive])
+}
+
+model LandlordSubscription {
+  id               String             @id @default(cuid())
+  landlordId       String
+  servicePackageId String
+  status           SubscriptionStatus @default(PENDING)
+  startsAt         DateTime
+  endsAt           DateTime
+  purchasedAt      DateTime?
+  amount           Decimal            @db.Decimal(12, 2)
+
+  landlord       LandlordProfile @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  servicePackage ServicePackage  @relation(fields: [servicePackageId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([landlordId])
+  @@index([servicePackageId])
+  @@index([status])
+  @@index([endsAt])
+}
+
+model PaymentMethod {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  payments    Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
