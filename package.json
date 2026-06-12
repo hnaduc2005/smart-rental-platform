@@ -15,6 +15,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "db:generate": "pnpm --filter @smart-rental/database prisma:generate",
     "db:migrate": "pnpm --filter @smart-rental/database prisma:migrate:dev",
+    "db:seed": "pnpm --filter @smart-rental/database prisma:seed",
     "db:studio": "pnpm --filter @smart-rental/database prisma:studio"
   },
   "devDependencies": {

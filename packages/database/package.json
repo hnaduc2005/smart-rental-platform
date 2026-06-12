@@ -8,10 +8,16 @@
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:migrate:dev": "prisma migrate dev --schema prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema prisma/schema.prisma",
-    "prisma:format": "prisma format --schema prisma/schema.prisma"
+    "prisma:format": "prisma format --schema prisma/schema.prisma",
+    "prisma:seed": "node prisma/seed.cjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0"
+    "@prisma/client": "^7.8.0",
+    "@prisma/client-runtime-utils": "^7.8.0",
+    "bcryptjs": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

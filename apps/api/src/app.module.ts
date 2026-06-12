@@ -11,6 +11,7 @@ import { LandlordsModule } from "./modules/landlords/landlords.module";
 import { MeterReadingsModule } from "./modules/meter-readings/meter-readings.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
+import { PrismaModule } from "./modules/prisma/prisma.module";
 import { PropertiesModule } from "./modules/properties/properties.module";
 import { RegionsModule } from "./modules/regions/regions.module";
 import { RentalRequestsModule } from "./modules/rental-requests/rental-requests.module";
@@ -29,6 +30,7 @@ import { ViewingAppointmentsModule } from "./modules/viewing-appointments/viewin
 
 @Module({
   imports: [
+    PrismaModule,
     AdminModule,
     AmenitiesModule,
     AuthModule,
