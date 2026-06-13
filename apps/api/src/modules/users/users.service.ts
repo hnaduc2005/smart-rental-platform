@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, Role, UserStatus } from "@smart-rental/database";
+import bcrypt from "bcryptjs";
+import { AuthenticatedUser } from "../../common/types/authenticated-user";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -42,5 +44,32 @@ export class UsersService {
       where: { id },
       data: { role }
     });
+  }
+
+  async validateUserPassword(email: string, password: string) {
+    const user = await this.findByEmail(email);
+
+    if (!user?.passwordHash) {
+      return null;
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    return isValidPassword ? user : null;
+  }
+
+  getSafeUser(user: {
+    id: string;
+    email: string;
+    fullName: string | null;
+    role: Role;
+    status: UserStatus;
+  }): AuthenticatedUser {
+    return {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      status: user.status
+    };
   }
 }

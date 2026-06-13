@@ -1,7 +1,19 @@
+const path = require("path");
 const bcrypt = require("bcryptjs");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { PrismaClient } = require("../generated/client");
 
-const prisma = new PrismaClient();
+require("dotenv").config({ path: path.resolve(__dirname, "../../../.env") });
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString })
+});
 
 const TEST_PASSWORDS = {
   admin: "Admin@123456",
