@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Navbar } from "@/components/layout";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Smart Rental Platform",
-  description: "Smart rental room management platform skeleton."
+  title: "SmartRental — Nền tảng thuê trọ thông minh",
+  description: "Tìm phòng trọ, căn hộ, ký túc xá nhanh chóng và dễ dàng trên SmartRental.",
 };
 
 type RootLayoutProps = {
@@ -14,7 +15,18 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="vi">
-      <body>{children}</body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        <Navbar />
+        <main>{children}</main>
+      </body>
     </html>
   );
 }

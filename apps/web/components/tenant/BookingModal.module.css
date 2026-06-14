@@ -1,0 +1,138 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 10, 40, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg-white);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-elevated);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-light-gray);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.closeBtn:hover {
+  color: var(--color-error);
+}
+
+.body {
+  padding: 24px;
+}
+
+.roomInfo {
+  background: rgba(0, 69, 168, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.roomTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin: 0 0 4px 0;
+}
+
+.roomPrice {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-orange);
+  margin: 0;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin-bottom: 8px;
+}
+
+.select {
+  width: 100%;
+  background-color: var(--bg-white);
+  color: var(--text-charcoal);
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.select:focus {
+  border-color: var(--color-deep-blue);
+  box-shadow: 0px 0px 0px 3px rgba(0, 69, 168, 0.1);
+}
+
+.textarea {
+  width: 100%;
+  background-color: var(--bg-white);
+  color: var(--text-charcoal);
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.textarea:focus {
+  border-color: var(--color-deep-blue);
+  box-shadow: 0px 0px 0px 3px rgba(0, 69, 168, 0.1);
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--bg-page);
+}
