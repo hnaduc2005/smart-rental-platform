@@ -1,0 +1,107 @@
+.navbar {
+  background-color: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: var(--shadow-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logoIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--color-deep-blue), var(--color-cyan));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  line-height: 1;
+}
+
+.logoSubtext {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-light-gray);
+  display: block;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navLink {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-charcoal);
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.navLink:hover {
+  color: var(--color-deep-blue);
+  border-bottom-color: var(--color-deep-blue);
+  text-decoration: none;
+}
+
+.navLink.active {
+  color: var(--color-deep-blue);
+  border-bottom-color: var(--color-deep-blue);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 100%;
+  background: linear-gradient(135deg, var(--color-deep-blue), var(--color-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.avatar:hover {
+  opacity: 0.85;
+}
