@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { UserStatus } from "@smart-rental/database";
 import { UsersService } from "../../modules/users/users.service";
 import { AuthenticatedRequest, JwtPayload } from "../types/authenticated-user";
 
@@ -24,9 +23,13 @@ export class JwtAuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET
       });
 
+      if (!payload.sub) {
+        throw new UnauthorizedException("Unauthorized");
+      }
+
       const user = await this.usersService.findById(payload.sub);
 
-      if (!user || user.status !== UserStatus.ACTIVE) {
+      if (!user || this.usersService.isAccountBlocked(user)) {
         throw new UnauthorizedException("Unauthorized");
       }
 

@@ -30,6 +30,6 @@ function getJwtExpiresIn(): JwtSignOptions["expiresIn"] {
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, RolesGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule]
+  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule, UsersModule]
 })
 export class AuthModule {}

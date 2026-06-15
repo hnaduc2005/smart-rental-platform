@@ -1,9 +1,17 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { UserStatus } from "@smart-rental/database";
-import { JwtPayload } from "../../common/types/authenticated-user";
+import { Prisma, Role, UserStatus, VerificationStatus } from "@smart-rental/database";
+import bcrypt from "bcryptjs";
+import { AuthenticatedUser, JwtPayload } from "../../common/types/authenticated-user";
 import { UsersService } from "../users/users.service";
 import { LoginDto } from "./dto/login.dto";
+import { RegisterDto } from "./dto/register.dto";
 
 @Injectable()
 export class AuthService {
@@ -12,6 +20,64 @@ export class AuthService {
     private readonly usersService: UsersService
   ) {}
 
+  async register(registerDto: RegisterDto) {
+    const role = registerDto.role ?? Role.SEEKER;
+
+    if (role === Role.ADMIN) {
+      throw new BadRequestException("ADMIN registration is not allowed from the public API");
+    }
+
+    const existingUser = await this.usersService.findByEmail(registerDto.email);
+
+    if (existingUser) {
+      throw new ConflictException("Email already exists");
+    }
+
+    if (registerDto.phone) {
+      const existingPhone = await this.usersService.findByPhone(registerDto.phone);
+
+      if (existingPhone) {
+        throw new ConflictException("Phone already exists");
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(registerDto.password, 10);
+    const status = role === Role.LANDLORD ? UserStatus.PENDING : UserStatus.ACTIVE;
+
+    try {
+      const user = await this.usersService.createUser({
+        email: registerDto.email,
+        passwordHash,
+        fullName: registerDto.fullName,
+        phone: registerDto.phone,
+        role,
+        status,
+        ...(role === Role.LANDLORD
+          ? {
+              landlordProfile: {
+                create: {
+                  publicDisplayName: registerDto.fullName,
+                  publicPhone: registerDto.phone,
+                  publicEmail: registerDto.email,
+                  verificationStatus: VerificationStatus.PENDING
+                }
+              }
+            }
+          : {})
+      });
+
+      return {
+        user: this.usersService.getSafeUser(user)
+      };
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException("Email or phone already exists");
+      }
+
+      throw error;
+    }
+  }
+
   async login(loginDto: LoginDto) {
     const user = await this.usersService.validateUserPassword(loginDto.email, loginDto.password);
 
@@ -19,31 +85,40 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    if (user.status !== UserStatus.ACTIVE) {
-      throw new ForbiddenException("User account is not active");
+    if (this.usersService.isAccountBlocked(user)) {
+      throw new ForbiddenException("User account is not allowed to sign in");
     }
 
+    const accessToken = await this.generateAccessToken(this.usersService.getSafeUser(user));
+    const loggedInUser = await this.usersService.updateLastLogin(user.id);
+
+    return {
+      accessToken,
+      user: this.usersService.getSafeUser(loggedInUser)
+    };
+  }
+
+  async generateAccessToken(user: Pick<AuthenticatedUser, "id" | "email" | "role">) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
-
-    return {
-      accessToken,
-      user: this.usersService.getSafeUser(user)
-    };
+    return this.jwtService.signAsync(payload);
   }
 
   async getCurrentUser(userId: string) {
     const user = await this.usersService.findById(userId);
 
-    if (!user || user.status !== UserStatus.ACTIVE) {
+    if (!user || this.usersService.isAccountBlocked(user)) {
       throw new UnauthorizedException("Unauthorized");
     }
 
     return this.usersService.getSafeUser(user);
+  }
+
+  private isUniqueConstraintError(error: unknown) {
+    return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
   }
 }
