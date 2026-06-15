@@ -1,0 +1,284 @@
+.page {
+  background: var(--bg-page);
+  min-height: 100vh;
+  padding: 40px 0 80px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 13px;
+  color: var(--text-light-gray);
+  margin-bottom: 24px;
+}
+
+.breadcrumb a {
+  color: var(--text-light-gray);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-deep-blue);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.address {
+  font-size: 14px;
+  color: var(--text-medium-gray);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.priceArea {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-orange);
+  margin: 0 0 4px 0;
+}
+
+.area {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  margin: 0;
+}
+
+/* Image Gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 240px 240px;
+  gap: 12px;
+  margin-bottom: 40px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mainImage {
+  grid-row: 1 / 3;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Main Content Layout */
+.contentLayout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.mainColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sidebarColumn {
+  width: 340px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+
+/* Section Common */
+.section {
+  background: var(--bg-white);
+  border-radius: 12px;
+  border: 1px solid var(--border-gray);
+  box-shadow: var(--shadow-subtle);
+  padding: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Description */
+.description {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-dark-gray);
+  white-space: pre-line;
+}
+
+/* Amenities Grid */
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.amenityItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-dark-gray);
+}
+
+.amenityIcon {
+  color: var(--color-deep-blue);
+  background: rgba(0, 69, 168, 0.08);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Map placeholder */
+.mapWrapper {
+  width: 100%;
+  height: 300px;
+  background: #E6ECF6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-medium-gray);
+  font-size: 14px;
+}
+
+/* Landlord Card */
+.landlordProfile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-deep-blue), var(--color-cyan));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.landlordName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin: 0 0 4px 0;
+}
+
+.landlordMeta {
+  font-size: 13px;
+  color: var(--text-medium-gray);
+  margin: 0;
+}
+
+.contactActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Reviews */
+.reviewItem {
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.reviewItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.reviewer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviewerAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark-gray);
+}
+
+.reviewerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin: 0 0 2px 0;
+}
+
+.reviewDate {
+  font-size: 12px;
+  color: var(--text-light-gray);
+  margin: 0;
+}
+
+.reviewRating {
+  color: #FBBF24; /* Star gold */
+  font-size: 14px;
+}
+
+.reviewContent {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  line-height: 1.6;
+  margin: 0;
+}
