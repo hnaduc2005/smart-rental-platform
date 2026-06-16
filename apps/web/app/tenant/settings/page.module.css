@@ -1,0 +1,178 @@
+/* Main Content wrapper */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Inline error text */
+.errorText {
+  font-size: 12.5px;
+  color: var(--color-error, #dc2626);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Password strength bar */
+.strengthBar {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strengthFill {
+  height: 4px;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.strengthLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-medium-gray);
+}
+
+/* Success banner */
+.successBanner {
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  color: #15803d;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.section {
+  background: var(--bg-white);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-subtle);
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Forms */
+.formRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.formGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+}
+
+/* Avatar Upload */
+.avatarUpload {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.avatarPreview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-deep-blue), var(--color-cyan));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  box-shadow: var(--shadow-raised);
+}
+
+/* Toggle Switch */
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.toggleRow:last-child {
+  border-bottom: none;
+}
+
+.toggleInfo h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin: 0 0 4px 0;
+}
+
+.toggleInfo p {
+  font-size: 13px;
+  color: var(--text-dark-gray);
+  margin: 0;
+}
+
+.toggleLabel {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggleInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-gray);
+  transition: .2s;
+  border-radius: 24px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+.toggleInput:checked + .toggleSlider {
+  background-color: var(--color-deep-blue);
+}
+
+.toggleInput:checked + .toggleSlider:before {
+  transform: translateX(20px);
+}
