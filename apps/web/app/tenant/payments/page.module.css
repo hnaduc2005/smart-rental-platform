@@ -1,0 +1,209 @@
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-raised);
+  margin-bottom: 24px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.uploadForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+}
+
+.select {
+  padding: 12px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-charcoal);
+  background: var(--bg-white);
+  outline: none;
+}
+
+.select:focus {
+  border-color: var(--color-deep-blue);
+  box-shadow: 0 0 0 3px rgba(0, 69, 168, 0.1);
+}
+
+.uploadBox {
+  border: 2px dashed var(--border-gray);
+  border-radius: 8px;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-page);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.uploadBox:hover {
+  border-color: var(--color-deep-blue);
+  background: rgba(0, 69, 168, 0.04);
+}
+
+.uploadIcon {
+  font-size: 32px;
+}
+
+.uploadText {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  line-height: 1.5;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  background: var(--bg-white);
+  transition: border-color 0.2s ease;
+}
+
+.historyItem:hover {
+  border-color: var(--color-deep-blue);
+}
+
+.historyLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historyId {
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  font-size: 15px;
+}
+
+.historyMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-dark-gray);
+}
+
+.historyRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.historyAmount {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+}
+
+.bankInfo {
+  background: var(--bg-page);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-light);
+}
+
+.bankRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.bankRow:last-child {
+  margin-bottom: 0;
+}
+
+.bankLabel {
+  color: var(--text-dark-gray);
+}
+
+.bankValue {
+  font-weight: 600;
+  color: var(--text-charcoal);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .historyItem {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .historyRight {
+    align-items: flex-start;
+    width: 100%;
+    border-top: 1px dashed var(--border-light);
+    padding-top: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,206 @@
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formCard {
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-raised);
+  height: fit-content;
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+}
+
+.select, .textarea {
+  padding: 12px 16px;
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-charcoal);
+  background: var(--bg-white);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.select:focus, .textarea:focus {
+  border-color: var(--color-deep-blue);
+  box-shadow: 0 0 0 3px rgba(0, 69, 168, 0.1);
+}
+
+.ratingInput {
+  display: flex;
+  gap: 8px;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+.ratingStar {
+  color: #D1D5DB;
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.ratingStar:hover {
+  transform: scale(1.1);
+}
+
+.ratingActive {
+  color: #FFB800;
+}
+
+.reviewList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewCard {
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-raised);
+  transition: box-shadow 0.2s ease;
+}
+
+.reviewCard:hover {
+  box-shadow: var(--shadow-base);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-light);
+  gap: 16px;
+}
+
+.roomInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.roomName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 0;
+}
+
+.reviewDate {
+  font-size: 13px;
+  color: var(--text-dark-gray);
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  font-size: 20px;
+}
+
+.cardBody {
+  padding: 20px;
+}
+
+.reviewContent {
+  font-size: 15px;
+  color: var(--text-charcoal);
+  line-height: 1.7;
+  margin: 0 0 20px;
+  font-style: italic;
+  border-left: 3px solid var(--border-light);
+  padding-left: 16px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-light);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 24px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 8px;
+}
+
+.emptyDesc {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  line-height: 1.6;
+}
