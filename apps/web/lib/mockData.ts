@@ -136,3 +136,170 @@ export const mockReviews = [
     content: 'An ninh tốt, giờ giấc tự do nên đi làm về trễ cũng tiện. Tuy nhiên chỗ để xe hơi chật.',
   }
 ];
+
+export const mockMyRoomData = {
+  id: 1,
+  title: 'Phòng trọ ban công view đẹp, full nội thất cao cấp',
+  address: '123 Nguyễn Trãi, Phường Phạm Ngũ Lão, Quận 1, TP.HCM',
+  price: 2500000,
+  area: 25,
+  images: [
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
+  ],
+  contract: {
+    contractId: 'HD-2026-00123',
+    startDate: '01/01/2026',
+    endDate: '31/12/2026',
+    deposit: 5000000,
+    status: 'Đang hiệu lực',
+  },
+  roommates: [
+    { id: 'rm1', name: 'Nguyễn Văn A', phone: '0901234567', role: 'Đại diện thuê' },
+    { id: 'rm2', name: 'Trần Thị B', phone: '0912345678', role: 'Thành viên' },
+  ],
+  rules: [
+    'Không tụ tập ồn ào sau 10h tối.',
+    'Không nuôi thú cưng (chó, mèo).',
+    'Giữ gìn vệ sinh chung khu vực hành lang và nhà xe.',
+    'Khóa cổng cẩn thận khi ra vào sau 11h đêm.',
+    'Chỉ để tối đa 2 xe máy tại khu vực nhà xe chung.'
+  ],
+  landlord: {
+    name: 'Nguyễn Văn Chủ',
+    phone: '0987654321'
+  }
+};
+
+export const mockInvoicesData = [
+  {
+    id: 'INV-2026-06',
+    month: 'Tháng 6, 2026',
+    status: 'unpaid',
+    dueDate: '10/07/2026',
+    roomRent: 2500000,
+    electricity: {
+      oldIndex: 1250,
+      newIndex: 1350,
+      usage: 100,
+      price: 3500,
+      total: 350000,
+      image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=500&auto=format&fit=crop&q=60'
+    },
+    water: {
+      oldIndex: 20,
+      newIndex: 25,
+      usage: 5,
+      price: 20000,
+      total: 100000,
+      image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=500&auto=format&fit=crop&q=60'
+    },
+    services: [
+      { name: 'Rác sinh hoạt', total: 50000 },
+      { name: 'Wifi cáp quang', total: 100000 },
+    ],
+    totalAmount: 3100000
+  },
+  {
+    id: 'INV-2026-05',
+    month: 'Tháng 5, 2026',
+    status: 'paid',
+    dueDate: '10/06/2026',
+    roomRent: 2500000,
+    electricity: {
+      oldIndex: 1160,
+      newIndex: 1250,
+      usage: 90,
+      price: 3500,
+      total: 315000,
+      image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=500&auto=format&fit=crop&q=60'
+    },
+    water: {
+      oldIndex: 15,
+      newIndex: 20,
+      usage: 5,
+      price: 20000,
+      total: 100000,
+      image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=500&auto=format&fit=crop&q=60'
+    },
+    services: [
+      { name: 'Rác sinh hoạt', total: 50000 },
+      { name: 'Wifi cáp quang', total: 100000 },
+    ],
+    totalAmount: 3065000
+  }
+];
+
+export const mockPaymentsData = [
+  {
+    id: 'PAY-2026-06',
+    invoiceId: 'INV-2026-06',
+    amount: 3100000,
+    date: '10/07/2026 09:30',
+    method: 'Chuyển khoản (Vietcombank)',
+    status: 'pending',
+    proofImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&auto=format&fit=crop&q=60',
+    note: 'Đang chờ chủ trọ xác nhận tiền vào tài khoản'
+  },
+  {
+    id: 'PAY-2026-05',
+    invoiceId: 'INV-2026-05',
+    amount: 3065000,
+    date: '08/06/2026 14:15',
+    method: 'Chuyển khoản (Techcombank)',
+    status: 'approved',
+    proofImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&auto=format&fit=crop&q=60',
+    note: 'Đã nhận đủ tiền'
+  },
+  {
+    id: 'PAY-2026-04',
+    invoiceId: 'INV-2026-04',
+    amount: 2950000,
+    date: '10/05/2026 18:20',
+    method: 'Tiền mặt',
+    status: 'approved',
+    proofImage: '',
+    note: 'Đóng trực tiếp cho quản lý'
+  }
+];
+
+export const mockIssuesData = [
+  {
+    id: 'ISS-2026-002',
+    title: 'Hỏng bóng đèn phòng khách',
+    category: 'Điện',
+    description: 'Bóng đèn chớp nháy liên tục từ tối qua, nhờ chú chủ trọ qua thay bóng mới giúp cháu.',
+    status: 'pending',
+    date: '12/07/2026 08:30',
+    image: ''
+  },
+  {
+    id: 'ISS-2026-001',
+    title: 'Vòi nước bồn rửa chén bị rỉ',
+    category: 'Nước',
+    description: 'Vòi nước bị rỉ từng giọt cả đêm, cháu đã khóa van nước tạm thời ở gầm tủ bếp.',
+    status: 'resolved',
+    date: '01/06/2026 15:30',
+    image: ''
+  }
+];
+
+export const mockReviewsData = [
+  {
+    id: 'REV-2026-001',
+    roomName: 'Phòng 101 - Số 12 Nguyễn Văn Cừ, Q.5',
+    roomImage: '',
+    rating: 4,
+    content: 'Phòng sạch sẽ, chủ trọ thân thiện và nhiệt tình. Khu vực an ninh tốt, gần chợ tiện mua sắm. Chỉ có điều giờ giấc hơi nghiêm, nhưng cũng là điều tốt.',
+    createdAt: '15/03/2026',
+    canEdit: true
+  },
+  {
+    id: 'REV-2025-003',
+    roomName: 'Phòng 205 - Số 88 Lê Văn Sỹ, Q.3',
+    roomImage: '',
+    rating: 3,
+    content: 'Phòng rộng rãi, có ban công thoáng mát. Tuy nhiên tiện ích xung quanh chưa nhiều, đặc biệt thiếu chỗ gửi xe máy vào buổi tối.',
+    createdAt: '20/11/2025',
+    canEdit: false
+  }
+];

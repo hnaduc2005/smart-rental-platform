@@ -1,0 +1,122 @@
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 24px;
+}
+
+.requestList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card */
+.requestCard {
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  box-shadow: var(--shadow-subtle);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.requestCard:hover {
+  box-shadow: var(--shadow-raised);
+}
+
+/* Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.typeTag {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-deep-blue);
+  background: rgba(0, 69, 168, 0.08);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.reqId {
+  font-size: 12px;
+  color: var(--text-medium-gray);
+  font-family: monospace;
+}
+
+.reqDate {
+  font-size: 13px;
+  color: var(--text-dark-gray);
+}
+
+/* Body */
+.cardBody {
+  padding: 20px;
+}
+
+.roomTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.roomAddress {
+  font-size: 13.5px;
+  color: var(--text-dark-gray);
+  margin: 0 0 16px 0;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.detailLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-medium-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.detailValue {
+  font-size: 14px;
+  color: var(--text-charcoal);
+}
+
+/* Footer */
+.cardFooter {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  background: var(--bg-page);
+}
