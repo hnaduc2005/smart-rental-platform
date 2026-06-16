@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Input, PropertyCard } from '@/components/common';
 import { FilterSidebar } from '@/components/common/FilterSidebar';
@@ -19,7 +19,7 @@ const DEFAULT_FILTERS: FilterState = {
   amenities: [],
 };
 
-export default function RoomsPage() {
+function RoomsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -174,5 +174,13 @@ export default function RoomsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RoomsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center' }}>Đang tải...</div>}>
+      <RoomsContent />
+    </Suspense>
   );
 }
