@@ -1,10 +1,22 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { Prisma, PropertyStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
+import { CreatePropertyDto } from "./dto/create-property.dto";
+import { UpdatePropertyDto } from "./dto/update-property.dto";
 
 @Injectable()
 export class PropertiesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getLandlordProfileOrThrow(userId: string) {
+    const landlord = await this.prisma.landlordProfile.findUnique({
+      where: { userId },
+    });
+    if (!landlord) {
+      throw new ForbiddenException("Landlord profile not found for this user");
+    }
+    return landlord;
+  }
 
   findMany(args: Prisma.PropertyFindManyArgs = {}) {
     const defaultInclude = args.select
@@ -20,6 +32,20 @@ export class PropertiesService {
     return this.prisma.property.findMany({
       ...args,
       ...(defaultInclude ? { include: defaultInclude } : {})
+    });
+  }
+
+  async findMyProperties(userId: string) {
+    const landlord = await this.getLandlordProfileOrThrow(userId);
+    return this.prisma.property.findMany({
+      where: {
+        landlordId: landlord.id,
+        status: { not: PropertyStatus.DELETED },
+      },
+      include: {
+        region: true,
+        rooms: true,
+      },
     });
   }
 
@@ -41,8 +67,62 @@ export class PropertiesService {
     });
   }
 
-  create(data: Prisma.PropertyCreateInput) {
-    return this.prisma.property.create({ data });
+  async createForLandlord(userId: string, dto: CreatePropertyDto) {
+    const landlord = await this.getLandlordProfileOrThrow(userId);
+    return this.prisma.property.create({
+      data: {
+        name: dto.name,
+        address: dto.address,
+        description: dto.description,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        landlord: {
+          connect: { id: landlord.id },
+        },
+        ...(dto.regionId ? { region: { connect: { id: dto.regionId } } } : {}),
+      },
+    });
+  }
+
+  async updateForLandlord(id: string, userId: string, dto: UpdatePropertyDto) {
+    const landlord = await this.getLandlordProfileOrThrow(userId);
+    
+    // Check ownership
+    const property = await this.prisma.property.findFirst({
+      where: { id, landlordId: landlord.id },
+    });
+    if (!property) {
+      throw new NotFoundException("Property not found or you do not have permission to edit it");
+    }
+
+    return this.prisma.property.update({
+      where: { id },
+      data: {
+        name: dto.name,
+        address: dto.address,
+        description: dto.description,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        ...(dto.regionId ? { region: { connect: { id: dto.regionId } } } : {}),
+      },
+    });
+  }
+
+  async deleteForLandlord(id: string, userId: string) {
+    const landlord = await this.getLandlordProfileOrThrow(userId);
+
+    // Check ownership
+    const property = await this.prisma.property.findFirst({
+      where: { id, landlordId: landlord.id },
+    });
+    if (!property) {
+      throw new NotFoundException("Property not found or you do not have permission to delete it");
+    }
+
+    return this.prisma.property.update({
+      where: { id },
+      data: { status: PropertyStatus.DELETED },
+    });
   }
 
   updateStatus(id: string, status: PropertyStatus) {
