@@ -1,0 +1,206 @@
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-raised);
+  margin-bottom: 24px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.roomInfo {
+  display: flex;
+  gap: 24px;
+}
+
+.roomImageWrapper {
+  flex-shrink: 0;
+}
+
+.roomImage {
+  width: 160px;
+  height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.roomDetails {
+  flex: 1;
+}
+
+.roomName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-deep-blue);
+  margin-bottom: 8px;
+}
+
+.roomAddress {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  margin-bottom: 12px;
+}
+
+.roomPrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-orange);
+  margin-bottom: 12px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border-light);
+  font-size: 14px;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  color: var(--text-dark-gray);
+}
+
+.infoValue {
+  font-weight: 500;
+  color: var(--text-charcoal);
+}
+
+.roommateList {
+  display: flex;
+  flex-direction: column;
+}
+
+.roommateItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.roommateItem:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 69, 168, 0.1);
+  color: var(--color-deep-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.roommateInfo {
+  flex: 1;
+}
+
+.roommateName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-charcoal);
+  margin: 0;
+}
+
+.roommateRole {
+  font-size: 12px;
+  color: var(--text-dark-gray);
+  margin: 0;
+}
+
+.roommatePhone {
+  font-size: 14px;
+  color: var(--text-charcoal);
+}
+
+.ruleList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ruleItem {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--text-charcoal);
+  line-height: 1.5;
+}
+
+.ruleItem::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--color-orange);
+  font-weight: bold;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .roomInfo {
+    flex-direction: column;
+  }
+  .roomImage {
+    width: 100%;
+    height: 200px;
+  }
+}
