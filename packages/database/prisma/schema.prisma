@@ -170,6 +170,11 @@ model LandlordProfile {
   verificationNote   String?
   verifiedAt         DateTime?
   rejectedReason     String?
+  
+  // Bank Information for rent payments
+  bankName           String?
+  bankAccountNumber  String?
+  bankAccountName    String?
 
   user          User                   @relation(fields: [userId], references: [id], onDelete: Restrict)
   properties    Property[]
@@ -533,6 +538,7 @@ model IssueReport {
   status          IssueStatus @default(OPEN)
   title           String
   description     String?
+  imageUrl        String?
   resolutionNote  String?
   resolvedAt      DateTime?
 
