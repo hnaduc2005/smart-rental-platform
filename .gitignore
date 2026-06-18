@@ -10,9 +10,4 @@ coverage
 *.log
 packages/database/generated
 
-# Ignore specific design reference file
-docs/tromoi.com-DESIGN.md
-docs/TENANT_ROADMAP.md
-docs/PROGRESS.md
-docs/GIT_STATUS_BY_PHASE.md
-SETUP_GUIDE.md
+
