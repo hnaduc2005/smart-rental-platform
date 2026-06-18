@@ -48,6 +48,8 @@ export function storeAccessToken(token: string) {
   }
 
   window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  // Also store in cookie so Next.js middleware can read it
+  document.cookie = `${TOKEN_STORAGE_KEY}=${token}; path=/; max-age=86400; SameSite=Lax`;
 }
 
 export function clearStoredAccessToken() {
@@ -56,6 +58,8 @@ export function clearStoredAccessToken() {
   }
 
   window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  // Also clear cookie
+  document.cookie = `${TOKEN_STORAGE_KEY}=; path=/; max-age=0; SameSite=Lax`;
 }
 
 export async function login(payload: LoginPayload) {

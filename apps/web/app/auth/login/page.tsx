@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError, login } from "@/lib";
+import { ApiError, login, getCurrentUser, getStoredAccessToken } from "@/lib";
 import type { AuthUser } from "@/lib";
 
 export default function LoginPage() {
@@ -14,6 +14,40 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    const token = getStoredAccessToken();
+    if (token) {
+      getCurrentUser(token)
+        ?.then((data) => {
+          if (data) {
+            setIsRedirecting(true);
+            redirectByRole(data.role);
+          } else {
+            setIsCheckingSession(false);
+          }
+        })
+        .catch(() => {
+          setIsCheckingSession(false);
+        });
+    } else {
+      setIsCheckingSession(false);
+    }
+  }, []);
+
+  const redirectByRole = (role: string) => {
+    if (role === "LANDLORD") {
+      router.push("/landlord/dashboard");
+    } else if (role === "ADMIN") {
+      router.push("/admin/dashboard");
+    } else if (role === "TENANT") {
+      router.push("/tenant/dashboard");
+    } else {
+      router.push("/");
+    }
+  };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -26,19 +60,25 @@ export default function LoginPage() {
       setUser(response.user);
 
       setTimeout(() => {
-        if (response.user.role === "LANDLORD") {
-          router.push("/landlord/dashboard");
-        } else if (response.user.role === "ADMIN") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/");
-        }
+        redirectByRole(response.user.role);
       }, 1000);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "Unable to sign in"));
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isCheckingSession) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', gap: '16px' }}>
+        <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid var(--color-deep-blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+        <p style={{ color: 'var(--text-charcoal)', fontWeight: 500 }}>
+          {isRedirecting ? 'Đang chuyển hướng...' : 'Đang kiểm tra phiên đăng nhập...'}
+        </p>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   return (

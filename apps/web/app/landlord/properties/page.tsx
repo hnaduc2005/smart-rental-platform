@@ -10,6 +10,8 @@ interface Property {
   name: string;
   address: string;
   description: string;
+  latitude?: number | null;
+  longitude?: number | null;
   rooms?: any[];
 }
 
@@ -36,16 +38,19 @@ export default function LandlordPropertiesPage() {
     }
   };
 
-  // Form states
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
 
   const handleOpenCreateModal = () => {
     setEditingProperty(null);
     setName("");
     setAddress("");
     setDescription("");
+    setLatitude("");
+    setLongitude("");
     setIsModalOpen(true);
   };
 
@@ -54,6 +59,8 @@ export default function LandlordPropertiesPage() {
     setName(property.name);
     setAddress(property.address);
     setDescription(property.description);
+    setLatitude(property.latitude?.toString() || "");
+    setLongitude(property.longitude?.toString() || "");
     setIsModalOpen(true);
   };
 
@@ -68,7 +75,13 @@ export default function LandlordPropertiesPage() {
 
     try {
       const token = getStoredAccessToken();
-      const payload = { name, address, description };
+      const payload = { 
+        name, 
+        address, 
+        description,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+      };
 
       if (editingProperty) {
         // Edit
@@ -192,6 +205,31 @@ export default function LandlordPropertiesPage() {
                     onChange={(e) => setAddress(e.target.value)}
                     required
                   />
+                </div>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div className={styles.formGroup} style={{ flex: 1 }}>
+                    <label className={styles.label}>
+                      Vĩ độ (Latitude) 
+                      <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#0066cc', marginLeft: '8px' }}>(Lấy từ Google Maps)</a>
+                    </label>
+                    <Input
+                      placeholder="VD: 21.028511"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      type="number"
+                      step="any"
+                    />
+                  </div>
+                  <div className={styles.formGroup} style={{ flex: 1 }}>
+                    <label className={styles.label}>Kinh độ (Longitude)</label>
+                    <Input
+                      placeholder="VD: 105.804817"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      type="number"
+                      step="any"
+                    />
+                  </div>
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Mô tả chi tiết</label>

@@ -80,18 +80,52 @@
   color: var(--text-dark-gray);
   border-radius: 8px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.navItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--color-deep-blue);
+  border-radius: 4px;
+  transform: scaleY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navItem:hover::before {
+  transform: scaleY(1);
 }
 
 .navItem:hover {
-  background-color: var(--bg-page);
+  background-color: rgba(0, 69, 168, 0.04);
   color: var(--color-deep-blue);
+  transform: translateX(4px);
 }
 
 .active {
-  background-color: #E6ECF6;
+  background-color: rgba(0, 69, 168, 0.08);
   color: var(--color-deep-blue);
+  transform: translateX(4px);
+  font-weight: 600;
+}
+
+.active::before {
+  transform: scaleY(1);
+}
+
+.navItem span:first-child {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navItem:hover span:first-child {
+  transform: scale(1.15) rotate(5deg);
 }
 
 .mainContent {

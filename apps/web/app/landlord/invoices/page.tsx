@@ -16,10 +16,12 @@ interface Invoice {
   totalAmount: number;
   status: "UNPAID" | "PAID" | "OVERDUE" | "CANCELLED" | "PENDING_CONFIRMATION" | "REJECTED";
   contract?: {
+    id?: string;
     code: string;
     room?: { name: string; property?: { name: string } };
     tenantProfile?: { user?: { fullName: string } };
   };
+  payments?: { id: string; amount: number; proofImageUrl: string; status: string; createdAt: string }[];
 }
 
 interface Contract {
@@ -176,6 +178,8 @@ export default function LandlordInvoicesPage() {
         return <span className={`${styles.badge} ${styles.badgeUnpaid}`}>Chưa thanh toán</span>;
       case "PAID":
         return <span className={`${styles.badge} ${styles.badgePaid}`}>Đã thanh toán</span>;
+      case "PENDING_CONFIRMATION":
+        return <span className={styles.badge} style={{ backgroundColor: "#fff3cd", color: "#856404", border: "1px solid #ffeeba" }}>Chờ xác nhận</span>;
       case "OVERDUE":
         return <span className={`${styles.badge} ${styles.badgeOverdue}`}>Quá hạn</span>;
       case "CANCELLED":
@@ -253,12 +257,12 @@ export default function LandlordInvoicesPage() {
             </div>
 
             <div className={styles.actions}>
-              {invoice.status === "UNPAID" && (
+              {(invoice.status === "UNPAID" || invoice.status === "PENDING_CONFIRMATION") && (
                 <button
                   className={`${styles.actionBtn} ${styles.payBtn}`}
                   onClick={() => handleStatusChange(invoice.id, "PAID")}
                 >
-                  Xác nhận đã thu tiền
+                  Xác nhận đã thanh toán
                 </button>
               )}
               <button 
@@ -414,6 +418,27 @@ export default function LandlordInvoicesPage() {
                 <span>Trạng thái: {getStatusBadge(selectedInvoice.status)}</span>
                 <span>Hạn đóng: <strong>{formatDate(selectedInvoice.dueDate)}</strong></span>
               </div>
+              {selectedInvoice.payments && selectedInvoice.payments.length > 0 && (
+                <div style={{ marginTop: 24, borderTop: "1px solid #eee", paddingTop: 16 }}>
+                  <h4 style={{ marginBottom: 12, fontSize: 16 }}>Ảnh minh chứng thanh toán</h4>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                    {selectedInvoice.payments.map((payment, index) => payment.proofImageUrl ? (
+                      <div key={payment.id} style={{ border: "1px solid #ddd", borderRadius: 8, padding: 8 }}>
+                        <p style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
+                          Gửi lúc: {new Date(payment.createdAt).toLocaleString("vi-VN")}
+                        </p>
+                        <a href={payment.proofImageUrl} target="_blank" rel="noreferrer">
+                          <img 
+                            src={payment.proofImageUrl} 
+                            alt={`Minh chứng ${index + 1}`} 
+                            style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 4, cursor: "pointer" }} 
+                          />
+                        </a>
+                      </div>
+                    ) : null)}
+                  </div>
+                </div>
+              )}
             </div>
             <div className={styles.modalFooter} style={{ padding: "16px", display: "flex", justifyContent: "flex-end", borderTop: "1px solid #eaeaea" }}>
               <Button type="button" onClick={() => setIsDetailModalOpen(false)}>

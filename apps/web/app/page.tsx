@@ -4,16 +4,31 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HeroSection } from '@/components/layout';
 import { PropertyCard, Badge } from '@/components/common';
-import { mockRooms, roomCategories } from '@/lib/mockData';
+import { apiRequest } from '@/lib/api';
 import styles from '@/app/page.module.css';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [realRooms, setRealRooms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const [roomCategories, setRoomCategories] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    apiRequest<any[]>('/rooms')
+      .then(data => setRealRooms(data))
+      .catch(err => console.error('Failed to load rooms:', err))
+      .finally(() => setIsLoading(false));
+
+    apiRequest<any[]>('/room-types')
+      .then(data => setRoomCategories(data))
+      .catch(err => console.error('Failed to load room types:', err));
+  }, []);
+
   const filteredRooms = activeCategory === 'all'
-    ? mockRooms
-    : mockRooms.filter((_, i) => i % roomCategories.findIndex(c => c.id === activeCategory) === 0);
+    ? realRooms
+    : realRooms.filter((r) => r.roomType?.id === activeCategory);
 
   return (
     <>
@@ -37,26 +52,46 @@ export default function HomePage() {
 
           {/* Category Tabs */}
           <div className={styles.tabs}>
+            <button
+              className={`${styles.tab} ${activeCategory === 'all' ? styles.tabActive : ''}`}
+              onClick={() => setActiveCategory('all')}
+            >
+              Tất cả
+            </button>
             {roomCategories.map((cat) => (
               <button
                 key={cat.id}
                 className={`${styles.tab} ${activeCategory === cat.id ? styles.tabActive : ''}`}
                 onClick={() => setActiveCategory(cat.id)}
               >
-                {cat.label}
+                {cat.name}
               </button>
             ))}
           </div>
 
           {/* Property Grid */}
           <div className={styles.grid}>
-            {mockRooms.slice(0, 10).map((room) => (
-              <PropertyCard
-                key={room.id}
-                {...room}
-                onClick={() => router.push(`/rooms/${room.id}`)}
-              />
-            ))}
+            {isLoading ? (
+              <div style={{ padding: '40px', textAlign: 'center', gridColumn: '1 / -1' }}>Đang tải danh sách phòng...</div>
+            ) : filteredRooms.length > 0 ? (
+              filteredRooms.slice(0, 10).map((room) => (
+                <PropertyCard
+                  key={room.id}
+                  id={room.id}
+                  title={room.name}
+                  price={room.price}
+                  area={room.area}
+                  address={`${room.address}${room.region ? `, ${room.region.name}` : ''}`}
+                  imageUrl={room.images?.[0]?.url}
+                  isHot={room.price > 3000000} // Ví dụ logic hiển thị thẻ HOT
+                  onClick={() => router.push(`/rooms/${room.id}`)}
+                />
+              ))
+            ) : (
+              <div style={{ padding: '40px', textAlign: 'center', gridColumn: '1 / -1', color: 'var(--text-medium-gray)' }}>
+                Hiện chưa có phòng trống nào trong danh mục này.
+              </div>
+            )}
           </div>
 
         </div>

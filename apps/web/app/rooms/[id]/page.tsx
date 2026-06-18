@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button, Badge } from '@/components/common';
 import { BookingModal } from '@/components/tenant';
-import { mockRoomDetails, mockReviews, amenities } from '@/lib/mockData';
+
+import { apiRequest } from '@/lib/api';
 import styles from './page.module.css';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 function formatPrice(value: number) {
@@ -20,16 +21,37 @@ function formatPrice(value: number) {
 }
 
 export default function RoomDetailsPage({ params }: PageProps) {
+  const unwrappedParams = React.use(params);
+  const roomId = unwrappedParams.id;
+  
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [room, setRoom] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // In a real app, fetch room by ID. For now, use mock data.
-  const room = mockRoomDetails;
+  React.useEffect(() => {
+    async function fetchRoom() {
+      try {
+        const data = await apiRequest(`/rooms/${roomId}`);
+        setRoom(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRoom();
+  }, [roomId]);
+
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center' }}>Đang tải thông tin phòng...</div>;
+  }
 
   if (!room) {
     notFound();
   }
 
-  const roomAmenities = amenities.filter(a => room.amenities.includes(a.id));
+  const roomAmenities = room.amenities?.map((ra: any) => ra.amenity) || [];
+  const reviews = room.reviews || [];
 
   return (
     <div className={styles.page}>
@@ -44,11 +66,11 @@ export default function RoomDetailsPage({ params }: PageProps) {
         <div className={styles.header}>
           <div>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-              <Badge variant="tag">{room.type}</Badge>
+              <Badge variant="tag">{room.roomType?.name || room.type || 'Phòng trọ'}</Badge>
               {room.isHot && <Badge variant="error">HOT</Badge>}
               <Badge variant="success">{room.status}</Badge>
             </div>
-            <h1 className={styles.title}>{room.title}</h1>
+            <h1 className={styles.title}>{room.name || room.title}</h1>
             <p className={styles.address}>📍 {room.address}</p>
           </div>
           <div className={styles.priceArea}>
@@ -60,9 +82,9 @@ export default function RoomDetailsPage({ params }: PageProps) {
         {/* Image Gallery */}
         {room.images && room.images.length > 0 && (
           <div className={styles.gallery}>
-            <img src={room.images[0]} alt="Main" className={styles.mainImage} />
-            {room.images[1] && <img src={room.images[1]} alt="Side 1" className={styles.sideImage} />}
-            {room.images[2] && <img src={room.images[2]} alt="Side 2" className={styles.sideImage} />}
+            <img src={room.images[0]?.url || room.images[0]} alt="Main" className={styles.mainImage} />
+            {room.images[1] && <img src={room.images[1]?.url || room.images[1]} alt="Side 1" className={styles.sideImage} />}
+            {room.images[2] && <img src={room.images[2]?.url || room.images[2]} alt="Side 2" className={styles.sideImage} />}
           </div>
         )}
 
@@ -81,10 +103,10 @@ export default function RoomDetailsPage({ params }: PageProps) {
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Tiện ích nổi bật</h2>
               <div className={styles.amenitiesGrid}>
-                {roomAmenities.map(amenity => (
+                {roomAmenities.map((amenity: any) => (
                   <div key={amenity.id} className={styles.amenityItem}>
                     <div className={styles.amenityIcon}>✓</div>
-                    <span>{amenity.label}</span>
+                    <span>{amenity.name || amenity.label}</span>
                   </div>
                 ))}
               </div>
@@ -94,14 +116,28 @@ export default function RoomDetailsPage({ params }: PageProps) {
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Vị trí trên bản đồ</h2>
               <div className={styles.mapWrapper}>
-                <iframe
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, borderRadius: '8px' }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${room.mapCoordinates.lng - 0.01}%2C${room.mapCoordinates.lat - 0.01}%2C${room.mapCoordinates.lng + 0.01}%2C${room.mapCoordinates.lat + 0.01}&layer=mapnik&marker=${room.mapCoordinates.lat}%2C${room.mapCoordinates.lng}`}
-                ></iframe>
+                {(() => {
+                  const lat = room.latitude || room.property?.latitude;
+                  const lng = room.longitude || room.property?.longitude;
+                  
+                  if (lat && lng) {
+                    return (
+                      <iframe
+                        width="100%"
+                        height="400px"
+                        style={{ border: 0, borderRadius: '8px' }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(lng) - 0.01}%2C${Number(lat) - 0.01}%2C${Number(lng) + 0.01}%2C${Number(lat) + 0.01}&layer=mapnik&marker=${Number(lat)}%2C${Number(lng)}`}
+                      ></iframe>
+                    );
+                  }
+                  return (
+                    <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>
+                      Chủ trọ chưa cập nhật tọa độ bản đồ
+                    </div>
+                  );
+                })()}
               </div>
             </section>
 
@@ -109,11 +145,13 @@ export default function RoomDetailsPage({ params }: PageProps) {
             <section className={styles.section}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid var(--border-light)' }}>
                 <h2 className={styles.sectionTitle} style={{ border: 'none', margin: 0, padding: 0 }}>Đánh giá từ người thuê</h2>
-                <Badge variant="info">⭐ {mockReviews.reduce((acc, r) => acc + r.rating, 0) / mockReviews.length} / 5</Badge>
+                <Badge variant="info">⭐ {reviews.length > 0 ? (reviews.reduce((acc: any, r: any) => acc + r.rating, 0) / reviews.length).toFixed(1) : 0} / 5</Badge>
               </div>
               
               <div>
-                {mockReviews.map(review => (
+                {reviews.length === 0 ? (
+                  <p style={{ color: 'var(--text-medium-gray)' }}>Chưa có đánh giá nào cho phòng này.</p>
+                ) : reviews.map((review: any) => (
                   <div key={review.id} className={styles.reviewItem}>
                     <div className={styles.reviewHeader}>
                       <div className={styles.reviewer}>
@@ -139,17 +177,16 @@ export default function RoomDetailsPage({ params }: PageProps) {
           <div className={styles.sidebarColumn}>
             <section className={styles.section}>
               <div className={styles.landlordProfile}>
-                <div className={styles.avatar}>{room.landlord.name.charAt(0)}</div>
+                <div className={styles.avatar}>{room.property?.landlord?.user?.fullName?.charAt(0) || room.landlord?.name?.charAt(0) || 'L'}</div>
                 <div>
-                  <p className={styles.landlordName}>{room.landlord.name}</p>
-                  <p className={styles.landlordMeta}>Đã tham gia: {room.landlord.joinedDate}</p>
-                  <p className={styles.landlordMeta}>Đang có {room.landlord.totalRooms} phòng</p>
+                  <p className={styles.landlordName}>{room.property?.landlord?.user?.fullName || room.landlord?.name || 'Chủ nhà'}</p>
+                  <p className={styles.landlordMeta}>Đang quản lý tài sản này</p>
                 </div>
               </div>
               
               <div className={styles.contactActions}>
                 <Button variant="cta" style={{ width: '100%' }} onClick={() => setIsBookingOpen(true)}>
-                  📞 Liên hệ: {room.landlord.phone}
+                  📞 Đặt hẹn / Gửi yêu cầu thuê
                 </Button>
                 <Button variant="secondary" style={{ width: '100%' }}>
                   💬 Nhắn tin trực tiếp
@@ -167,7 +204,8 @@ export default function RoomDetailsPage({ params }: PageProps) {
       <BookingModal 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)} 
-        roomTitle={room.title} 
+        roomId={roomId}
+        roomTitle={room.name || room.title} 
         roomPrice={room.price} 
       />
     </div>

@@ -21,6 +21,7 @@ function formatPrice(price: number): string {
 }
 
 export function PropertyCard({
+  id,
   title,
   price,
   area,
@@ -31,10 +32,45 @@ export function PropertyCard({
 }: PropertyCardProps) {
   const [isWishlisted, setIsWishlisted] = React.useState(false);
 
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('smart-rental.wishlist');
+      if (stored) {
+        const list = JSON.parse(stored);
+        if (list.some((item: any) => item.id === id)) {
+          setIsWishlisted(true);
+        }
+      }
+    } catch (e) {}
+  }, [id]);
+
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-    // In real app: save to API/localStorage
+    
+    const newStatus = !isWishlisted;
+    setIsWishlisted(newStatus);
+    
+    try {
+      const stored = localStorage.getItem('smart-rental.wishlist');
+      let list = stored ? JSON.parse(stored) : [];
+      
+      if (newStatus) {
+        // Add to wishlist
+        if (!list.some((item: any) => item.id === id)) {
+          list.push({ id, title, price, area, address, imageUrl, isHot });
+        }
+      } else {
+        // Remove from wishlist
+        list = list.filter((item: any) => item.id !== id);
+      }
+      
+      localStorage.setItem('smart-rental.wishlist', JSON.stringify(list));
+      
+      // Dispatch an event so other components (like Wishlist page) can update
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    } catch (e) {
+      console.error("Lỗi khi lưu yêu thích", e);
+    }
   };
 
   return (

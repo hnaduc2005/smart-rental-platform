@@ -2,8 +2,6 @@
 
 import React from 'react';
 import styles from './FilterSidebar.module.css';
-import { provinces, districtsByProvince, roomTypes, amenities } from '@/lib/mockData';
-
 export interface FilterState {
   province: string;
   district: string;
@@ -18,6 +16,10 @@ export interface FilterState {
 interface FilterSidebarProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
+  provinces: any[];
+  districts: any[];
+  roomTypes: any[];
+  amenities: any[];
 }
 
 const MAX_PRICE = 15000000;
@@ -28,7 +30,7 @@ function formatPrice(value: number) {
   return `${(value / 1000).toFixed(0)}k`;
 }
 
-export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onChange, provinces, districts, roomTypes, amenities }: FilterSidebarProps) {
 
   const update = (partial: Partial<FilterState>) =>
     onChange({ ...filters, ...partial });
@@ -48,7 +50,6 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
     roomTypes: [], amenities: [],
   });
 
-  const districts = filters.province ? (districtsByProvince[filters.province] ?? []) : [];
 
   const pricePercent = (filters.maxPrice / MAX_PRICE) * 100;
   const areaPercent = (filters.maxArea / MAX_AREA) * 100;
@@ -70,7 +71,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
         >
           <option value="">-- Tỉnh / Thành phố --</option>
           {provinces.map((p) => (
-            <option key={p.id} value={p.id}>{p.label}</option>
+            <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
         <select
@@ -81,7 +82,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
         >
           <option value="">-- Quận / Huyện --</option>
           {districts.map((d) => (
-            <option key={d.id} value={d.id}>{d.label}</option>
+            <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
       </div>
@@ -163,7 +164,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
                 <div className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ''}`}>
                   {checked && <span className={styles.checkmark}>✓</span>}
                 </div>
-                {rt.label}
+                {rt.name}
               </label>
             );
           })}
@@ -181,7 +182,7 @@ export function FilterSidebar({ filters, onChange }: FilterSidebarProps) {
                 <div className={`${styles.checkbox} ${checked ? styles.checkboxChecked : ''}`}>
                   {checked && <span className={styles.checkmark}>✓</span>}
                 </div>
-                {am.label}
+                {am.name}
               </label>
             );
           })}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/common";
-import { mockReviewsData } from "@/lib/mockData";
+import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./page.module.css";
 
 function StarRating({ rating }: { rating: number }) {
@@ -18,27 +18,65 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function TenantReviewsPage() {
-  const reviews = mockReviewsData;
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
-  const [selectedRoom, setSelectedRoom] = useState("");
+  const [selectedRoomId, setSelectedRoomId] = useState("");
   const [reviewContent, setReviewContent] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const handleEdit = (review: any) => {
-    setEditingId(review.id);
-    // Tạm gán mock giá trị phòng dựa theo review
-    setSelectedRoom(review.id === "REV-2026-001" ? "room1" : "room2");
-    setSelectedRating(review.rating);
-    setReviewContent(review.content);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const token = getStoredAccessToken();
+      const [reviewsData, contractsData] = await Promise.all([
+        apiRequest<any[]>("/reviews/tenant/my", { token }),
+        apiRequest<any[]>("/contracts/tenant/my", { token }),
+      ]);
+      setReviews(reviewsData);
+      setContracts(contractsData);
+    } catch (error: any) {
+      alert("Lỗi tải dữ liệu: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setSelectedRoom("");
-    setSelectedRating(0);
-    setReviewContent("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRoomId) return alert("Vui lòng chọn phòng để đánh giá.");
+    if (selectedRating === 0) return alert("Vui lòng chọn số sao đánh giá.");
+
+    setIsSubmitting(true);
+    try {
+      const token = getStoredAccessToken();
+      const contract = contracts.find((c) => c.roomId === selectedRoomId);
+      await apiRequest("/reviews", {
+        method: "POST",
+        body: {
+          roomId: selectedRoomId,
+          contractId: contract?.id,
+          rating: selectedRating,
+          comment: reviewContent
+        },
+        token
+      });
+      alert("Đăng tải đánh giá thành công!");
+      setSelectedRoomId("");
+      setSelectedRating(0);
+      setReviewContent("");
+      fetchData(); // Reload reviews
+    } catch (error: any) {
+      alert("Lỗi: " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,7 +89,7 @@ export default function TenantReviewsPage() {
         {/* Cột trái: Form Viết Đánh giá mới */}
         <div className={styles.formCard}>
           <h2 className={styles.formTitle}>
-            {editingId ? "Cập nhật đánh giá" : "Viết đánh giá mới"}
+            Viết đánh giá mới
           </h2>
           
           <form>
@@ -59,12 +97,15 @@ export default function TenantReviewsPage() {
               <label className={styles.label}>Phòng / Hợp đồng cần đánh giá</label>
               <select 
                 className={styles.select}
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
+                value={selectedRoomId}
+                onChange={(e) => setSelectedRoomId(e.target.value)}
               >
                 <option value="">-- Chọn phòng bạn đã hoặc đang thuê --</option>
-                <option value="room1">Phòng 101 - Số 12 Nguyễn Văn Cừ (Đang thuê)</option>
-                <option value="room2">Phòng 205 - Số 88 Lê Văn Sỹ (Đã kết thúc)</option>
+                {contracts.map((c) => (
+                  <option key={c.roomId} value={c.roomId}>
+                    {c.room.name} - {c.room.property.name} ({c.status === "ACTIVE" ? "Đang thuê" : "Đã kết thúc"})
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -95,14 +136,9 @@ export default function TenantReviewsPage() {
             </div>
 
             <div style={{ marginTop: "24px", display: "flex", gap: "12px" }}>
-              <Button variant="primary" fullWidth>
-                {editingId ? "Lưu thay đổi" : "Đăng tải đánh giá"}
+              <Button variant="primary" fullWidth onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Đang gửi..." : "Đăng tải đánh giá"}
               </Button>
-              {editingId && (
-                <Button variant="secondary" onClick={handleCancelEdit}>
-                  Hủy
-                </Button>
-              )}
             </div>
           </form>
         </div>
@@ -129,28 +165,15 @@ export default function TenantReviewsPage() {
                   {/* Header: Tên phòng + Sao */}
                   <div className={styles.cardHeader}>
                     <div className={styles.roomInfo}>
-                      <h2 className={styles.roomName}>{review.roomName}</h2>
-                      <span className={styles.reviewDate}>Đã đánh giá: {review.createdAt}</span>
+                      <h2 className={styles.roomName}>{review.room.name} - {review.room.property.name}</h2>
+                      <span className={styles.reviewDate}>Đã đánh giá: {new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
                     <StarRating rating={review.rating} />
                   </div>
 
                   {/* Body: Nội dung đánh giá */}
                   <div className={styles.cardBody}>
-                    <p className={styles.reviewContent}>&quot;{review.content}&quot;</p>
-
-                    <div className={styles.cardActions}>
-                      {review.canEdit ? (
-                        <>
-                          <Button variant="secondary" onClick={() => handleEdit(review)}>Chỉnh sửa</Button>
-                          <Button variant="ghost">Xóa</Button>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: "13px", color: "var(--text-dark-gray)", fontStyle: "italic" }}>
-                          ⚠ Đã quá 30 ngày, không thể chỉnh sửa đánh giá này.
-                        </span>
-                      )}
-                    </div>
+                    <p className={styles.reviewContent}>&quot;{review.comment}&quot;</p>
                   </div>
                 </div>
               ))}

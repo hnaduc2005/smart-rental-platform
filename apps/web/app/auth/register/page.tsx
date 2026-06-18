@@ -100,9 +100,8 @@ export default function RegisterPage() {
               onChange={(event) => setRole(event.target.value as PublicRole)}
               value={role}
             >
-              <option value="SEEKER">Seeker</option>
-              <option value="TENANT">Tenant</option>
-              <option value="LANDLORD">Landlord</option>
+              <option value="SEEKER">Người tìm phòng</option>
+              <option value="LANDLORD">Chủ trọ</option>
             </select>
           </label>
 

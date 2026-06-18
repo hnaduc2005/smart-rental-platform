@@ -3,15 +3,32 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PropertyCard, Button } from '@/components/common';
-import { mockRooms } from '@/lib/mockData';
 import styles from './page.module.css';
 
 export default function WishlistPage() {
   const router = useRouter();
   
-  // Mock wishlist state. In real app, fetch from API.
-  // We'll just randomly select 3 rooms for the mock
-  const [wishlist, setWishlist] = useState(() => mockRooms.slice(2, 5));
+  const [wishlist, setWishlist] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const loadWishlist = () => {
+      try {
+        const stored = localStorage.getItem('smart-rental.wishlist');
+        if (stored) {
+          setWishlist(JSON.parse(stored));
+        } else {
+          setWishlist([]);
+        }
+      } catch (e) {
+        console.error("Lỗi tải yêu thích", e);
+      }
+    };
+
+    loadWishlist();
+
+    window.addEventListener('wishlistUpdated', loadWishlist);
+    return () => window.removeEventListener('wishlistUpdated', loadWishlist);
+  }, []);
 
   return (
     <div className={styles.page}>

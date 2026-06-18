@@ -10,6 +10,7 @@ interface IssueReport {
   description: string;
   priority: "LOW" | "MEDIUM" | "HIGH";
   status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REJECTED";
+  imageUrl?: string;
   createdAt: string;
   contract?: {
     room?: { name: string; property?: { name: string } };
@@ -143,6 +144,13 @@ export default function LandlordReportsPage() {
             <div className={styles.description}>
               <strong>Mô tả:</strong> {report.description}
             </div>
+
+            {report.imageUrl && (
+              <div style={{ marginTop: '12px', padding: '0 24px' }}>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-dark-gray)', marginBottom: '8px' }}>Ảnh đính kèm:</p>
+                <img src={report.imageUrl} alt="Sự cố" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', border: '1px solid var(--border-light)', objectFit: 'contain' }} />
+              </div>
+            )}
 
             <div className={styles.actions}>
               {report.status === "OPEN" && (

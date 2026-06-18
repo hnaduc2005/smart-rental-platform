@@ -1,45 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Badge, Button } from '@/components/common';
 import { ReviewModal } from '@/components/tenant';
+import { apiRequest, getStoredAccessToken } from '@/lib';
 import styles from './page.module.css';
 
 export default function TenantDashboard() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewRoomTitle, setReviewRoomTitle] = useState('');
+  const [reviewRoomId, setReviewRoomId] = useState('');
+  const [reviewContractId, setReviewContractId] = useState('');
 
-  // Mock data for requests
-  const requests = [
-    {
-      id: 'req1',
-      roomTitle: 'Phòng trọ ban công view đẹp, full nội thất cao cấp',
-      date: '10/06/2026',
-      status: 'pending',
-      type: 'Hẹn xem phòng',
-      landlord: 'Nguyễn Văn A - 0901234567'
-    },
-    {
-      id: 'req2',
-      roomTitle: 'Ký túc xá sinh viên sạch sẽ gần ĐH Bách Khoa',
-      date: '08/06/2026',
-      status: 'approved',
-      type: 'Đặt cọc',
-      landlord: 'Trần Thị B - 0987654321'
-    }
-  ];
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for rented rooms
-  const rentedRooms = [
-    {
-      id: 'rent1',
-      roomTitle: 'Studio mini đầy đủ tiện nghi cho người độc thân',
-      startDate: '01/01/2026',
-      price: '4.500.000 đ',
-      nextPayment: '01/07/2026'
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const token = getStoredAccessToken();
+      const [contractsData, reqData] = await Promise.all([
+        apiRequest<any[]>("/contracts/tenant/my", { token }),
+        apiRequest<any[]>("/rental-requests/seeker/my", { token }),
+      ]);
+      setContracts(contractsData);
+      setRequests(reqData);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  if (loading) return <div style={{ padding: 24 }}>Đang tải dữ liệu...</div>;
 
   return (
     <div className={styles.content}>
@@ -51,21 +49,22 @@ export default function TenantDashboard() {
       {/* Rented Rooms Section */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>🏠 Phòng đang thuê</h2>
-        {rentedRooms.map(room => (
-          <div key={room.id} className={styles.requestCard}>
+        {contracts.length === 0 ? (
+          <p style={{ color: 'var(--text-medium-gray)' }}>Bạn chưa thuê phòng nào.</p>
+        ) : contracts.map(contract => (
+          <div key={contract.id} className={styles.requestCard}>
             <div className={styles.requestInfo}>
-              <h4>{room.roomTitle}</h4>
-              <p>Ngày bắt đầu thuê: {room.startDate}</p>
-              <p>Giá thuê: {room.price}/tháng</p>
-              <p style={{ color: 'var(--color-error)', fontWeight: 600 }}>Hạn đóng tiền tiếp theo: {room.nextPayment}</p>
+              <h4>{contract.room?.name} - {contract.room?.property?.name}</h4>
+              <p>Ngày bắt đầu thuê: {new Date(contract.startDate).toLocaleDateString('vi-VN')}</p>
+              <p>Giá thuê: {Number(contract.rentAmount).toLocaleString('vi-VN')} ₫/tháng</p>
+              <p style={{ color: 'var(--color-error)', fontWeight: 600 }}>Ngày đóng tiền: Mùng {contract.paymentDueDay} hàng tháng</p>
             </div>
             <div className={styles.requestActions}>
-              <Badge variant="success">Đang ở</Badge>
+              <Badge variant="success">{contract.status === "ACTIVE" ? "Đang ở" : "Đã kết thúc"}</Badge>
               <div className={styles.actionBtn}>
-                <Button variant="secondary" onClick={() => {
-                  setReviewRoomTitle(room.roomTitle);
-                  setIsReviewOpen(true);
-                }}>Viết đánh giá (Review)</Button>
+                <Link href={`/tenant/reviews`} style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary">Đánh giá phòng</Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -81,33 +80,30 @@ export default function TenantDashboard() {
           </Link>
         </h2>
 
-        {requests.map(req => (
+        {requests.length === 0 ? (
+          <p style={{ color: 'var(--text-medium-gray)' }}>Không có yêu cầu nào gần đây.</p>
+        ) : requests.map(req => (
           <div key={req.id} className={styles.requestCard}>
             <div className={styles.requestInfo}>
-              <h4>{req.roomTitle}</h4>
-              <p>Loại yêu cầu: <strong>{req.type}</strong></p>
-              <p>Ngày gửi: {req.date}</p>
-              <p>Chủ trọ: {req.landlord}</p>
+              <h4>{req.room?.name} - {req.room?.property?.name}</h4>
+              <p>Lời nhắn: {req.message}</p>
+              <p>Ngày gửi: {new Date(req.createdAt).toLocaleDateString('vi-VN')}</p>
+              <p>Chủ trọ: {req.room?.property?.landlord?.publicDisplayName} ({req.room?.property?.landlord?.publicPhone})</p>
             </div>
             <div className={styles.requestActions}>
-              {req.status === 'pending' ? (
+              {req.status === 'PENDING' ? (
                 <Badge variant="warning">Chờ xác nhận</Badge>
-              ) : (
+              ) : req.status === 'APPROVED' ? (
                 <Badge variant="success">Đã chấp nhận</Badge>
+              ) : (
+                <Badge variant="error">Đã từ chối</Badge>
               )}
-              <div className={styles.actionBtn}>
-                <Button variant="ghost">Hủy yêu cầu</Button>
-              </div>
             </div>
           </div>
         ))}
       </section>
 
-      <ReviewModal
-        isOpen={isReviewOpen}
-        onClose={() => setIsReviewOpen(false)}
-        roomTitle={reviewRoomTitle}
-      />
+
     </div>
   );
 }

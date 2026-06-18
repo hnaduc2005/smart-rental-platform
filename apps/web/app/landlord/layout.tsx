@@ -24,8 +24,8 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
       return;
     }
 
-    getCurrentUser(token)
-      .then((data) => {
+    getCurrentUser(token as string)
+      ?.then((data) => {
         if (!data || data.role !== "LANDLORD") {
           router.push("/login");
         } else {
@@ -35,7 +35,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
       .catch(() => {
         router.push("/login");
       })
-      .finally(() => {
+      ?.finally(() => {
         setIsLoading(false);
       });
   }, [router]);
@@ -71,6 +71,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
     { label: "Tiền cọc", href: "/landlord/deposits", icon: "💰" },
     { label: "Hóa đơn", href: "/landlord/invoices", icon: "🧾" },
     { label: "Báo cáo sự cố", href: "/landlord/reports", icon: "⚠️" },
+    { label: "Cài đặt thanh toán", href: "/landlord/settings", icon: "⚙️" },
   ];
 
   return (
@@ -116,7 +117,9 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
             </div>
             <div style={{ textAlign: "right" }}>
               <div className={styles.userName}>{user?.fullName || user?.email}</div>
-              <span className={styles.roleBadge}>{user?.role}</span>
+              <span className={styles.roleBadge}>
+                {user?.role === "LANDLORD" ? "Chủ trọ" : user?.role}
+              </span>
             </div>
             <button
               onClick={handleLogout}

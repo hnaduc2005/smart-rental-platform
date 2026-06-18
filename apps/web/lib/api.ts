@@ -39,7 +39,12 @@ export async function apiRequest<TResponse>(path: string, options: ApiRequestOpt
   if (!response.ok) {
     if (response.status === 401 && typeof window !== "undefined") {
       window.localStorage.removeItem("smart-rental.accessToken");
-      window.location.href = "/login";
+      document.cookie = "smart-rental.accessToken=; path=/; max-age=0; SameSite=Lax";
+      
+      // Only redirect if not already on login page
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
     throw new ApiError(getErrorMessage(data, response.statusText), response.status, data);
   }
