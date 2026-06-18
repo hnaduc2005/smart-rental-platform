@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { JwtModule, type JwtSignOptions } from "@nestjs/jwt";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../../common/guards/roles.guard";
@@ -18,6 +18,7 @@ function getJwtExpiresIn(): JwtSignOptions["expiresIn"] {
   return (process.env.JWT_EXPIRES_IN ?? "1d") as JwtSignOptions["expiresIn"];
 }
 
+@Global()
 @Module({
   imports: [
     UsersModule,

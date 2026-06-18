@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
-import { Prisma, PropertyStatus } from "@smart-rental/database";
+import { Prisma, PropertyStatus, RoomStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { UpdatePropertyDto } from "./dto/update-property.dto";
@@ -44,7 +44,9 @@ export class PropertiesService {
       },
       include: {
         region: true,
-        rooms: true,
+        rooms: {
+          where: { status: { not: RoomStatus.HIDDEN } }
+        },
       },
     });
   }

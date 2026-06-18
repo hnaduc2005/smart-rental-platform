@@ -49,6 +49,15 @@ export class ContractsService {
       throw new BadRequestException("This room is already rented");
     }
 
+    // Verify tenant profile exists
+    const tenantProfile = await this.prisma.tenantProfile.findUnique({
+      where: { id: dto.tenantProfileId },
+    });
+
+    if (!tenantProfile) {
+      throw new BadRequestException("ID Hồ sơ người thuê (TenantProfile ID) không hợp lệ hoặc không tồn tại.");
+    }
+
     return this.prisma.contract.create({
       data: {
         roomId: dto.roomId,

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
-import { Prisma, RoomStatus } from "@smart-rental/database";
+import { Prisma, RoomStatus, PropertyStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
@@ -49,7 +49,10 @@ export class RoomsService {
     const landlord = await this.getLandlordProfileOrThrow(userId);
     return this.prisma.room.findMany({
       where: {
-        property: { landlordId: landlord.id },
+        property: { 
+          landlordId: landlord.id,
+          status: { not: PropertyStatus.DELETED }
+        },
         status: { not: RoomStatus.HIDDEN },
       },
       include: {
