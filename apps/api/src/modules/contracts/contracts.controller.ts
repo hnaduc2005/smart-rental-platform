@@ -19,6 +19,12 @@ export class ContractsController {
     return this.contractsService.getForLandlord(user.id);
   }
 
+  @Get("tenant/my")
+  @Roles(Role.TENANT, Role.SEEKER)
+  getForTenant(@CurrentUser() user: AuthenticatedUser) {
+    return this.contractsService.getForTenant(user.id);
+  }
+
   @Post()
   @Roles(Role.LANDLORD)
   createContract(

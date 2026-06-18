@@ -19,11 +19,41 @@ export class InvoicesService {
       include: {
         contract: {
           select: {
+            id: true,
             code: true,
             room: { select: { name: true, property: { select: { name: true } } } },
             tenantProfile: { select: { user: { select: { fullName: true } } } },
           },
         },
+        payments: true,
+      },
+      orderBy: { billingMonth: "desc" },
+    });
+  }
+
+  async getForTenant(tenantUserId: string) {
+    const tenant = await this.prisma.tenantProfile.findUnique({
+      where: { userId: tenantUserId },
+    });
+    if (!tenant) {
+      return []; // Return empty array for Seekers without a tenant profile
+    }
+
+    return this.prisma.invoice.findMany({
+      where: { contract: { tenantProfileId: tenant.id } },
+      include: {
+        contract: {
+          select: {
+            room: { select: { name: true, property: { select: { name: true } } } },
+            landlord: { select: { 
+              user: { select: { fullName: true, phone: true } },
+              bankName: true,
+              bankAccountNumber: true,
+              bankAccountName: true
+            } },
+          },
+        },
+        payments: true
       },
       orderBy: { billingMonth: "desc" },
     });
@@ -85,9 +115,27 @@ export class InvoicesService {
       throw new NotFoundException("Invoice not found");
     }
 
-    return this.prisma.invoice.update({
-      where: { id: invoiceId },
-      data: { status: dto.status },
+    return this.prisma.$transaction(async (tx) => {
+      const updatedInvoice = await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { status: dto.status },
+      });
+
+      // Nếu hóa đơn được đánh dấu là Đã thanh toán, tự động xác nhận các giao dịch thanh toán chờ xử lý
+      if (dto.status === "PAID") {
+        await tx.payment.updateMany({
+          where: {
+            invoiceId: invoiceId,
+            status: "PENDING",
+          },
+          data: {
+            status: "CONFIRMED",
+            confirmedAt: new Date(),
+          },
+        });
+      }
+
+      return updatedInvoice;
     });
   }
 }

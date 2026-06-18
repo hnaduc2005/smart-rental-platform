@@ -63,6 +63,12 @@ export class AuthService {
                 }
               }
             }
+          : role === Role.TENANT
+          ? {
+              tenantProfile: {
+                create: {}
+              }
+            }
           : {})
       });
 

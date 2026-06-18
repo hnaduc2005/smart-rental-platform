@@ -14,6 +14,24 @@ export class LandlordsService {
     });
   }
 
+  getMyProfile(userId: string) {
+    return this.prisma.landlordProfile.findUnique({
+      where: { userId },
+      include: { user: { select: { fullName: true, phone: true, email: true } } }
+    });
+  }
+
+  async updateMyProfile(userId: string, data: { bankName?: string; bankAccountNumber?: string; bankAccountName?: string }) {
+    return this.prisma.landlordProfile.update({
+      where: { userId },
+      data: {
+        bankName: data.bankName,
+        bankAccountNumber: data.bankAccountNumber,
+        bankAccountName: data.bankAccountName
+      }
+    });
+  }
+
   findById(id: string) {
     return this.prisma.landlordProfile.findUnique({
       where: { id },

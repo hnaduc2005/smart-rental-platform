@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Patch, Post, Body, UseGuards } from "@nestjs/common";
 import { Role } from "@smart-rental/database";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../../common/guards/roles.guard";
 import { AuthenticatedUser } from "../../common/types/authenticated-user";
 import { UpdateRentalRequestStatusDto } from "./dto/update-rental-request-status.dto";
+import { CreateRentalRequestDto } from "./dto/create-rental-request.dto";
 import { RentalRequestsService } from "./rental-requests.service";
 
 @Controller("rental-requests")
@@ -17,6 +18,21 @@ export class RentalRequestsController {
   @Roles(Role.LANDLORD)
   getForLandlord(@CurrentUser() user: AuthenticatedUser) {
     return this.rentalRequestsService.getForLandlord(user.id);
+  }
+
+  @Get("seeker/my")
+  @Roles(Role.SEEKER, Role.TENANT)
+  getForSeeker(@CurrentUser() user: AuthenticatedUser) {
+    return this.rentalRequestsService.getForSeeker(user.id);
+  }
+
+  @Post()
+  @Roles(Role.SEEKER, Role.TENANT)
+  createRequest(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateRentalRequestDto
+  ) {
+    return this.rentalRequestsService.create(user.id, dto);
   }
 
   @Patch(":id/status")

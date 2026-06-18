@@ -25,6 +25,24 @@ export class ContractsService {
     });
   }
 
+  async getForTenant(tenantUserId: string) {
+    const tenant = await this.prisma.tenantProfile.findUnique({
+      where: { userId: tenantUserId },
+    });
+    if (!tenant) {
+      return []; // Return empty array instead of throwing if Seeker has no tenant profile
+    }
+
+    return this.prisma.contract.findMany({
+      where: { tenantProfileId: tenant.id },
+      include: {
+        room: { select: { id: true, name: true, property: { select: { name: true } } } },
+        landlord: { select: { user: { select: { fullName: true, phone: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async createContract(landlordUserId: string, dto: CreateContractDto) {
     const landlord = await this.prisma.landlordProfile.findUnique({
       where: { userId: landlordUserId },
@@ -111,12 +129,24 @@ export class ContractsService {
             status: ContractStatus.ACTIVE,
             activeRoomId: contract.roomId,
           },
+          include: { tenantProfile: true },
         });
 
         await tx.room.update({
           where: { id: contract.roomId },
           data: { status: RoomStatus.RENTED },
         });
+
+        // Tự động nâng cấp quyền (Role) của User lên TENANT (Người thuê)
+        if (updatedContract.tenantProfile?.userId) {
+          const user = await tx.user.findUnique({ where: { id: updatedContract.tenantProfile.userId } });
+          if (user && user.role === "SEEKER") {
+            await tx.user.update({
+              where: { id: user.id },
+              data: { role: "TENANT" },
+            });
+          }
+        }
 
         return updatedContract;
       });

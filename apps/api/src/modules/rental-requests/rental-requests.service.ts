@@ -2,10 +2,38 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { RentalRequestStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateRentalRequestStatusDto } from "./dto/update-rental-request-status.dto";
+import { CreateRentalRequestDto } from "./dto/create-rental-request.dto";
 
 @Injectable()
 export class RentalRequestsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
+
+  async create(seekerUserId: string, dto: CreateRentalRequestDto) {
+    const room = await this.prisma.room.findUnique({ where: { id: dto.roomId } });
+    if (!room) {
+      throw new NotFoundException("Room not found");
+    }
+
+    return this.prisma.rentalRequest.create({
+      data: {
+        roomId: dto.roomId,
+        seekerId: seekerUserId,
+        message: dto.message,
+      }
+    });
+  }
+
+  async getForSeeker(seekerUserId: string) {
+    return this.prisma.rentalRequest.findMany({
+      where: { seekerId: seekerUserId },
+      include: {
+        room: {
+          select: { id: true, name: true, property: { select: { id: true, name: true, landlord: { select: { publicDisplayName: true, publicPhone: true } } } } }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
 
   async getForLandlord(landlordUserId: string) {
     const landlord = await this.prisma.landlordProfile.findUnique({
@@ -58,7 +86,7 @@ export class RentalRequestsService {
       throw new NotFoundException("Rental request not found or you do not have permission to modify it");
     }
 
-    return this.prisma.rentalRequest.update({
+    const updatedRequest = await this.prisma.rentalRequest.update({
       where: { id: requestId },
       data: {
         status: dto.status,
@@ -73,5 +101,21 @@ export class RentalRequestsService {
         }
       }
     });
+
+    // Tự động tạo TenantProfile cho Seeker nếu được Approve và chưa có profile
+    if (dto.status === RentalRequestStatus.APPROVED) {
+      const seekerId = updatedRequest.seeker.id;
+      const existingProfile = await this.prisma.tenantProfile.findUnique({
+        where: { userId: seekerId }
+      });
+      
+      if (!existingProfile) {
+        await this.prisma.tenantProfile.create({
+          data: { userId: seekerId }
+        });
+      }
+    }
+
+    return updatedRequest;
   }
 }

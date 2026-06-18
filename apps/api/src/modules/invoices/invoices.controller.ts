@@ -19,6 +19,12 @@ export class InvoicesController {
     return this.invoicesService.getForLandlord(user.id);
   }
 
+  @Get("tenant/my")
+  @Roles(Role.TENANT, Role.SEEKER)
+  getForTenant(@CurrentUser() user: AuthenticatedUser) {
+    return this.invoicesService.getForTenant(user.id);
+  }
+
   @Post()
   @Roles(Role.LANDLORD)
   createInvoice(
