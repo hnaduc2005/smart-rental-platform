@@ -3,12 +3,14 @@
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ApiError, register } from "@/lib";
 import type { AuthRole, AuthUser } from "@/lib";
 
 type PublicRole = Exclude<AuthRole, "ADMIN">;
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -34,6 +36,10 @@ export default function RegisterPage() {
       });
 
       setUser(response.user);
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "Unable to create account"));
     } finally {

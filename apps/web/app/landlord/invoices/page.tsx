@@ -36,6 +36,10 @@ export default function LandlordInvoicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Detail Modal states
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   // Form states
   const [contractId, setContractId] = useState("");
@@ -78,10 +82,18 @@ export default function LandlordInvoicesPage() {
         body: { status: newStatus },
         token
       });
+      if (newStatus === "PAID") {
+        alert("Xác nhận thu tiền thành công!");
+      }
       fetchData(); // Reload data
     } catch (error: any) {
       alert("Lỗi cập nhật trạng thái: " + error.message);
     }
+  };
+
+  const handleViewDetails = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsDetailModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -249,7 +261,10 @@ export default function LandlordInvoicesPage() {
                   Xác nhận đã thu tiền
                 </button>
               )}
-              <button className={`${styles.actionBtn} ${styles.viewBtn}`}>
+              <button 
+                className={`${styles.actionBtn} ${styles.viewBtn}`}
+                onClick={() => handleViewDetails(invoice)}
+              >
                 Xem chi tiết
               </button>
             </div>
@@ -350,6 +365,61 @@ export default function LandlordInvoicesPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isDetailModalOpen && selectedInvoice && (
+        <div className={styles.modalOverlay} onClick={() => setIsDetailModalOpen(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 500 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Chi tiết hóa đơn {formatMonth(selectedInvoice.billingMonth)}</h3>
+              <button className={styles.closeBtn} onClick={() => setIsDetailModalOpen(false)}>×</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div style={{ marginBottom: 16 }}>
+                <strong>Thông tin Hợp đồng:</strong> {selectedInvoice.contract?.code || `HĐ-${selectedInvoice.contract?.id?.slice(0, 6)}`}
+                <br/>
+                <strong>Phòng:</strong> {selectedInvoice.contract?.room?.name} - {selectedInvoice.contract?.room?.property?.name}
+                <br/>
+                <strong>Đại diện thuê:</strong> {selectedInvoice.contract?.tenantProfile?.user?.fullName}
+              </div>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 16 }}>
+                <tbody>
+                  <tr style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "8px 0" }}>Tiền phòng</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(selectedInvoice.roomAmount)}</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "8px 0" }}>Tiền điện</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(selectedInvoice.electricAmount)}</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "8px 0" }}>Tiền nước</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(selectedInvoice.waterAmount)}</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid #eee" }}>
+                    <td style={{ padding: "8px 0" }}>Dịch vụ khác</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(selectedInvoice.serviceAmount)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: "12px 0", fontWeight: "bold", fontSize: 18 }}>Tổng cộng</td>
+                    <td style={{ padding: "12px 0", textAlign: "right", fontWeight: "bold", fontSize: 18, color: "var(--primary-blue)" }}>
+                      {formatCurrency(selectedInvoice.totalAmount)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>Trạng thái: {getStatusBadge(selectedInvoice.status)}</span>
+                <span>Hạn đóng: <strong>{formatDate(selectedInvoice.dueDate)}</strong></span>
+              </div>
+            </div>
+            <div className={styles.modalFooter} style={{ padding: "16px", display: "flex", justifyContent: "flex-end", borderTop: "1px solid #eaeaea" }}>
+              <Button type="button" onClick={() => setIsDetailModalOpen(false)}>
+                Đóng
+              </Button>
+            </div>
           </div>
         </div>
       )}

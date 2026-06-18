@@ -14,6 +14,19 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
 
+  // Hide global navbar on dashboard, landlord, tenant, admin, and auth portals
+  const shouldHideNavbar =
+    pathname && (
+      pathname.startsWith('/landlord') ||
+      pathname.startsWith('/admin') ||
+      pathname.startsWith('/tenant') ||
+      pathname.startsWith('/auth')
+    );
+
+  if (shouldHideNavbar) {
+    return null;
+  }
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
@@ -42,8 +55,12 @@ export function Navbar() {
 
         {/* Actions */}
         <div className={styles.actions}>
-          <Button variant="secondary">Đăng nhập</Button>
-          <Button variant="primary">Đăng ký</Button>
+          <Link href="/login">
+            <Button variant="secondary">Đăng nhập</Button>
+          </Link>
+          <Link href="/register">
+            <Button variant="primary">Đăng ký</Button>
+          </Link>
         </div>
 
       </div>

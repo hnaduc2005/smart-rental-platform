@@ -1,0 +1,339 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 0;
+}
+
+.createBtn {
+  background-color: var(--color-orange);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.createBtn:hover {
+  opacity: 0.9;
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 200px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.roomInfo h3 {
+  font-weight: 600;
+  color: var(--color-deep-blue);
+  font-size: 16px;
+  margin: 0 0 4px 0;
+}
+
+.roomInfo p {
+  font-size: 13px;
+  color: var(--text-medium-gray);
+  margin: 0;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badgeDraft {
+  background-color: #F3F4F6;
+  color: #4B5563;
+}
+
+.badgeActive {
+  background-color: #D1FAE5;
+  color: #059669;
+}
+
+.badgeEnded {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.badgeTerminated {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.badgeExpired {
+  background-color: #E5E7EB;
+  color: #6B7280;
+}
+
+.details {
+  background-color: var(--bg-gray);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.detailRow:last-child {
+  margin-bottom: 0;
+}
+
+.detailLabel {
+  color: var(--text-medium-gray);
+}
+
+.detailValue {
+  font-weight: 600;
+  color: var(--text-dark-gray);
+}
+
+.highlightValue {
+  color: var(--color-orange);
+  font-size: 14px;
+}
+
+.tenantInfo {
+  margin-bottom: 16px;
+}
+
+.tenantName {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tenantContact {
+  font-size: 13px;
+  color: var(--text-medium-gray);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+  text-align: center;
+}
+
+.actionBtn:hover {
+  opacity: 0.9;
+}
+
+.activateBtn {
+  background-color: #10B981;
+  color: white;
+}
+
+.endBtn {
+  background-color: white;
+  color: #F59E0B;
+  border: 1px solid #F59E0B;
+}
+
+.viewBtn {
+  background-color: white;
+  color: var(--color-deep-blue);
+  border: 1px solid var(--border-light);
+}
+
+/* Modal UI - Tromoi Design System */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(27, 23, 24, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: rgba(19, 25, 28, 0.16) 2px 3px 8px 0px;
+  animation: slideUp 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #E6ECF6;
+  background-color: #FFFFFF;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0045A8;
+  font-family: 'Inter', sans-serif;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #65676B;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: #F54B4B;
+}
+
+.modalBody {
+  padding: 24px;
+  color: #1B1718;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #E6ECF6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #F8F8F8;
+  border-radius: 0 0 12px 12px;
+}
+
+.formGroupFull {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2E2A2A;
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.select, .textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E6ECF6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1B1718;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:focus, .textarea:focus {
+  outline: none;
+  border-color: #00B7FF;
+  box-shadow: 0 0 0 3px rgba(0, 183, 255, 0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

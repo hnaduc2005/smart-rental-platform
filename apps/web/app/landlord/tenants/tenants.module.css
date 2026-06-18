@@ -1,0 +1,281 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.searchInput {
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 300px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-deep-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tenantInfo h3 {
+  font-weight: 600;
+  color: var(--color-deep-blue);
+  font-size: 16px;
+  margin: 0 0 4px 0;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badgeMain {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.badgeCoTenant {
+  background-color: #E5E7EB;
+  color: #4B5563;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-dark-gray);
+}
+
+.icon {
+  color: var(--text-medium-gray);
+  width: 20px;
+  text-align: center;
+}
+
+.roomTag {
+  background-color: var(--bg-gray);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark-gray);
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  background-color: white;
+  color: var(--text-dark-gray);
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.actionBtn:hover {
+  background-color: var(--bg-gray);
+  color: var(--color-deep-blue);
+}
+
+/* Modal UI - Tromoi Design System */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(27, 23, 24, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: rgba(19, 25, 28, 0.16) 2px 3px 8px 0px;
+  animation: slideUp 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #E6ECF6;
+  background-color: #FFFFFF;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0045A8;
+  font-family: 'Inter', sans-serif;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #65676B;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: #F54B4B;
+}
+
+.modalBody {
+  padding: 24px;
+  color: #1B1718;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #E6ECF6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #F8F8F8;
+  border-radius: 0 0 12px 12px;
+}
+
+.formGroupFull {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2E2A2A;
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.select, .textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E6ECF6;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1B1718;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:focus, .textarea:focus {
+  outline: none;
+  border-color: #00B7FF;
+  box-shadow: 0 0 0 3px rgba(0, 183, 255, 0.1);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

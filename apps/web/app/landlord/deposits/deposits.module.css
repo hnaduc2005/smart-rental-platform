@@ -1,0 +1,154 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 200px;
+}
+
+.tableContainer {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.table th {
+  background-color: #F8FAFC;
+  font-weight: 600;
+  color: var(--color-deep-blue);
+  font-size: 14px;
+}
+
+.table td {
+  font-size: 14px;
+  color: var(--text-dark-gray);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--color-orange);
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badgePending {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.badgePaid {
+  background-color: #D1FAE5;
+  color: #059669;
+}
+
+.badgeRefunded {
+  background-color: #DBEAFE;
+  color: #2563EB;
+}
+
+.badgeForfeited {
+  background-color: #F3F4F6;
+  color: #4B5563;
+}
+
+.badgeRejected {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.actionBtn:hover {
+  opacity: 0.9;
+}
+
+.confirmBtn {
+  background-color: #10B981;
+  color: white;
+}
+
+.rejectBtn {
+  background-color: white;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.viewBtn {
+  background-color: white;
+  color: var(--color-deep-blue);
+  border: 1px solid var(--border-light);
+}
+
+.imagePreview {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+}
+
+.noImage {
+  color: var(--text-medium-gray);
+  font-style: italic;
+  font-size: 13px;
+}

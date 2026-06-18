@@ -3,10 +3,12 @@
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ApiError, login } from "@/lib";
 import type { AuthUser } from "@/lib";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +24,16 @@ export default function LoginPage() {
     try {
       const response = await login({ email, password });
       setUser(response.user);
+
+      setTimeout(() => {
+        if (response.user.role === "LANDLORD") {
+          router.push("/landlord/dashboard");
+        } else if (response.user.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/");
+        }
+      }, 1000);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "Unable to sign in"));
     } finally {

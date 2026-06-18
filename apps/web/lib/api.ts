@@ -37,6 +37,10 @@ export async function apiRequest<TResponse>(path: string, options: ApiRequestOpt
   const data = await parseResponseBody(response);
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.localStorage.removeItem("smart-rental.accessToken");
+      window.location.href = "/login";
+    }
     throw new ApiError(getErrorMessage(data, response.statusText), response.status, data);
   }
 
