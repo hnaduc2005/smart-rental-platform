@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { CONTRACT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
 
 export default function TenantMyRoomPage() {
@@ -97,7 +98,7 @@ export default function TenantMyRoomPage() {
             </div>
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>Trạng thái</span>
-              <Badge variant="success">{contract.status}</Badge>
+              <Badge variant="success">{translateStatus(contract.status, CONTRACT_STATUS_MAP)}</Badge>
             </div>
           </div>
 

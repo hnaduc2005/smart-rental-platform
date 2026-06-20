@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { ISSUE_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
 
 export default function TenantIssuesPage() {
@@ -99,12 +100,13 @@ export default function TenantIssuesPage() {
     }
   };
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending': return <Badge variant="warning">Chờ xử lý</Badge>;
-      case 'in_progress': return <Badge variant="info">Đang sửa chữa</Badge>;
-      case 'resolved': return <Badge variant="success">Đã khắc phục</Badge>;
-      default: return null;
-    }
+    let variant: "warning" | "success" | "error" | "info" = "info";
+    const upperStatus = status.toUpperCase();
+    if (upperStatus === "OPEN" || upperStatus === "PENDING") variant = "warning";
+    else if (upperStatus === "IN_PROGRESS") variant = "info";
+    else if (upperStatus === "RESOLVED" || upperStatus === "CLOSED") variant = "success";
+    else if (upperStatus === "REJECTED") variant = "error";
+    return <Badge variant={variant}>{translateStatus(upperStatus === "PENDING" ? "OPEN" : upperStatus, ISSUE_STATUS_MAP)}</Badge>;
   };
 
   return (

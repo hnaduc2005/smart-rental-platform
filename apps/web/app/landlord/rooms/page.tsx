@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { getCurrentUser } from "@/lib/auth";
+import { ROOM_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./rooms.module.css";
 
 interface Room {
@@ -229,17 +230,12 @@ export default function LandlordRoomsPage() {
 
       <div className={styles.grid}>
         {filteredRooms.map((room) => {
-          let statusText = "Còn trống";
+          let statusText = translateStatus(room.status, ROOM_STATUS_MAP);
           let badgeClass = styles.statusAvailable;
 
           if (room.status === "RENTED") {
-            statusText = "Đã thuê";
             badgeClass = styles.statusRented;
-          } else if (room.status === "MAINTENANCE") {
-            statusText = "Bảo trì";
-            badgeClass = styles.statusMaintenance;
-          } else if (room.status === "DEPOSITED") {
-            statusText = "Đã cọc";
+          } else if (room.status === "MAINTENANCE" || room.status === "DEPOSITED" || room.status === "HIDDEN") {
             badgeClass = styles.statusMaintenance;
           }
 
@@ -359,10 +355,10 @@ export default function LandlordRoomsPage() {
                       value={status}
                       onChange={(e) => setStatus(e.target.value as Room["status"])}
                     >
-                      <option value="AVAILABLE">Còn trống (Available)</option>
-                      <option value="DEPOSITED">Đã đặt cọc (Deposited)</option>
-                      <option value="RENTED">Đã cho thuê (Rented)</option>
-                      <option value="MAINTENANCE">Đang bảo trì (Maintenance)</option>
+                      <option value="AVAILABLE">{ROOM_STATUS_MAP["AVAILABLE"]}</option>
+                      <option value="DEPOSITED">{ROOM_STATUS_MAP["DEPOSITED"]}</option>
+                      <option value="RENTED">{ROOM_STATUS_MAP["RENTED"]}</option>
+                      <option value="MAINTENANCE">{ROOM_STATUS_MAP["MAINTENANCE"]}</option>
                     </select>
                   </div>
                   

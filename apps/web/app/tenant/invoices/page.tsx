@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { INVOICE_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
 
 export default function TenantInvoicesPage() {
@@ -27,23 +28,16 @@ export default function TenantInvoicesPage() {
   };
 
   const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-      case 'unpaid':
-        return <Badge variant="warning">Chưa thanh toán</Badge>;
-      case 'PAID':
-      case 'paid':
-        return <Badge variant="success">Đã thanh toán</Badge>;
-      case 'PARTIALLY_PAID':
-        return <Badge variant="info">Thanh toán một phần</Badge>;
-      case 'PROCESSING':
-        return <Badge variant="info">Đang xử lý</Badge>;
-      case 'OVERDUE':
-      case 'overdue':
-        return <Badge variant="error">Quá hạn</Badge>;
-      default:
-        return null;
+    let variant: "warning" | "success" | "error" | "info" = "info";
+    const upperStatus = status.toUpperCase();
+    if (upperStatus === "UNPAID" || upperStatus === "PENDING_CONFIRMATION" || upperStatus === "PENDING") {
+      variant = "warning";
+    } else if (upperStatus === "PAID") {
+      variant = "success";
+    } else if (upperStatus === "OVERDUE") {
+      variant = "error";
     }
+    return <Badge variant={variant}>{translateStatus(upperStatus === "PENDING" ? "UNPAID" : upperStatus, INVOICE_STATUS_MAP)}</Badge>;
   };
 
   return (
@@ -121,14 +115,14 @@ export default function TenantInvoicesPage() {
                       {Number(invoice.totalAmount).toLocaleString("vi-VN")} ₫
                     </span>
                   </div>
-                  {invoice.status === 'PENDING' && (
+                  {(invoice.status === 'UNPAID' || invoice.status === 'PENDING') && (
                     <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px" }}>
                       Vui lòng thanh toán đầy đủ trước ngày {new Date(invoice.dueDate).toLocaleDateString('vi-VN')} để không bị tính phí phạt.
                     </p>
                   )}
                 </div>
                 
-                {invoice.status === 'PENDING' && (
+                {(invoice.status === 'UNPAID' || invoice.status === 'PENDING') && (
                   <Link href={`/tenant/payments?invoiceId=${invoice.id}`} style={{ width: '100%', textDecoration: 'none' }}>
                     <Button variant="cta" fullWidth>Thanh toán ngay</Button>
                   </Link>

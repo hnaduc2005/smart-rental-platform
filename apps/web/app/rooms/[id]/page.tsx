@@ -7,6 +7,7 @@ import { Button, Badge } from '@/components/common';
 import { BookingModal } from '@/components/tenant';
 
 import { apiRequest } from '@/lib/api';
+import { ROOM_STATUS_MAP, translateStatus } from '@/lib/status-translators';
 import styles from './page.module.css';
 
 interface PageProps {
@@ -68,7 +69,7 @@ export default function RoomDetailsPage({ params }: PageProps) {
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
               <Badge variant="tag">{room.roomType?.name || room.type || 'Phòng trọ'}</Badge>
               {room.isHot && <Badge variant="error">HOT</Badge>}
-              <Badge variant="success">{room.status}</Badge>
+              <Badge variant="success">{translateStatus(room.status, ROOM_STATUS_MAP)}</Badge>
             </div>
             <h1 className={styles.title}>{room.name || room.title}</h1>
             <p className={styles.address}>📍 {room.address}</p>

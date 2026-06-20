@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge, Button } from '@/components/common';
 import { ReviewModal } from '@/components/tenant';
 import { apiRequest, getStoredAccessToken } from '@/lib';
+import { CONTRACT_STATUS_MAP, RENTAL_REQUEST_STATUS_MAP, translateStatus } from '@/lib/status-translators';
 import styles from './page.module.css';
 
 export default function TenantDashboard() {
@@ -60,7 +61,7 @@ export default function TenantDashboard() {
               <p style={{ color: 'var(--color-error)', fontWeight: 600 }}>Ngày đóng tiền: Mùng {contract.paymentDueDay} hàng tháng</p>
             </div>
             <div className={styles.requestActions}>
-              <Badge variant="success">{contract.status === "ACTIVE" ? "Đang ở" : "Đã kết thúc"}</Badge>
+              <Badge variant="success">{translateStatus(contract.status, CONTRACT_STATUS_MAP)}</Badge>
               <div className={styles.actionBtn}>
                 <Link href={`/tenant/reviews`} style={{ textDecoration: 'none' }}>
                   <Button variant="secondary">Đánh giá phòng</Button>
@@ -91,13 +92,9 @@ export default function TenantDashboard() {
               <p>Chủ trọ: {req.room?.property?.landlord?.publicDisplayName} ({req.room?.property?.landlord?.publicPhone})</p>
             </div>
             <div className={styles.requestActions}>
-              {req.status === 'PENDING' ? (
-                <Badge variant="warning">Chờ xác nhận</Badge>
-              ) : req.status === 'APPROVED' ? (
-                <Badge variant="success">Đã chấp nhận</Badge>
-              ) : (
-                <Badge variant="error">Đã từ chối</Badge>
-              )}
+              <Badge variant={req.status === 'APPROVED' ? 'success' : (req.status === 'REJECTED' || req.status === 'CANCELLED') ? 'error' : 'warning'}>
+                {translateStatus(req.status, RENTAL_REQUEST_STATUS_MAP)}
+              </Badge>
             </div>
           </div>
         ))}

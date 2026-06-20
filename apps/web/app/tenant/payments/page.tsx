@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { PAYMENT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
 
 function PaymentsContent() {
@@ -103,13 +104,10 @@ function PaymentsContent() {
   const landlordBankInfo = selectedInvoiceData?.contract?.landlord || null;
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING': return <Badge variant="warning">Chờ xác nhận</Badge>;
-      case 'CONFIRMED': return <Badge variant="success">Đã xác nhận</Badge>;
-      case 'REJECTED': return <Badge variant="error">Bị từ chối</Badge>;
-      case 'CANCELLED': return <Badge variant="error">Đã hủy</Badge>;
-      default: return null;
-    }
+    let variant: "warning" | "success" | "error" = "warning";
+    if (status === "CONFIRMED") variant = "success";
+    else if (status === "REJECTED" || status === "CANCELLED") variant = "error";
+    return <Badge variant={variant}>{translateStatus(status, PAYMENT_STATUS_MAP)}</Badge>;
   };
 
   if (loading) return <div style={{ padding: 24 }}>Đang tải dữ liệu...</div>;

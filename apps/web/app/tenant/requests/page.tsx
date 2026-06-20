@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { RENTAL_REQUEST_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
 
-const statusConfig: Record<string, { label: string; variant: "warning" | "success" | "error" | "info" }> = {
-  PENDING: { label: "Chờ xác nhận", variant: "warning" },
-  APPROVED: { label: "Đã chấp nhận", variant: "success" },
-  REJECTED: { label: "Bị từ chối", variant: "error" },
+const statusVariantMap: Record<string, "warning" | "success" | "error" | "info"> = {
+  PENDING: "warning",
+  APPROVED: "success",
+  REJECTED: "error",
+  CANCELLED: "error",
 };
 
 export default function TenantRequestsPage() {
@@ -49,8 +51,8 @@ export default function TenantRequestsPage() {
                 </span>
                 <span className={styles.reqDate}>📅 {new Date(req.createdAt).toLocaleDateString('vi-VN')}</span>
               </div>
-              <Badge variant={statusConfig[req.status]?.variant || "info"}>
-                {statusConfig[req.status]?.label || req.status}
+              <Badge variant={statusVariantMap[req.status] || "info"}>
+                {translateStatus(req.status, RENTAL_REQUEST_STATUS_MAP)}
               </Badge>
             </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { APPOINTMENT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./viewing-appointments.module.css";
 
 interface Appointment {
@@ -78,20 +79,16 @@ export default function LandlordAppointmentsPage() {
   };
 
   const getStatusBadge = (status: string) => {
+    let badgeClass = "";
     switch (status) {
-      case "REQUESTED":
-        return <span className={`${styles.badge} ${styles.badgeRequested}`}>Chờ xác nhận</span>;
-      case "CONFIRMED":
-        return <span className={`${styles.badge} ${styles.badgeConfirmed}`}>Đã chốt lịch</span>;
-      case "CANCELLED":
-        return <span className={`${styles.badge} ${styles.badgeCancelled}`}>Đã hủy</span>;
-      case "COMPLETED":
-        return <span className={`${styles.badge} ${styles.badgeCompleted}`}>Đã xem phòng</span>;
-      case "NO_SHOW":
-        return <span className={`${styles.badge} ${styles.badgeNoShow}`}>Khách không đến</span>;
-      default:
-        return null;
+      case "REQUESTED": badgeClass = styles.badgeRequested; break;
+      case "CONFIRMED": badgeClass = styles.badgeConfirmed; break;
+      case "CANCELLED": badgeClass = styles.badgeCancelled; break;
+      case "COMPLETED": badgeClass = styles.badgeCompleted; break;
+      case "NO_SHOW": badgeClass = styles.badgeNoShow; break;
+      default: return null;
     }
+    return <span className={`${styles.badge} ${badgeClass}`}>{translateStatus(status, APPOINTMENT_STATUS_MAP)}</span>;
   };
 
   if (isLoading) {
@@ -111,10 +108,10 @@ export default function LandlordAppointmentsPage() {
           onChange={(e) => setFilterStatus(e.target.value)}
         >
           <option value="ALL">Tất cả trạng thái</option>
-          <option value="REQUESTED">Chờ xác nhận</option>
-          <option value="CONFIRMED">Đã chốt lịch</option>
-          <option value="COMPLETED">Đã xem xong</option>
-          <option value="CANCELLED">Đã hủy</option>
+          <option value="REQUESTED">{APPOINTMENT_STATUS_MAP["REQUESTED"]}</option>
+          <option value="CONFIRMED">{APPOINTMENT_STATUS_MAP["CONFIRMED"]}</option>
+          <option value="COMPLETED">{APPOINTMENT_STATUS_MAP["COMPLETED"]}</option>
+          <option value="CANCELLED">{APPOINTMENT_STATUS_MAP["CANCELLED"]}</option>
         </select>
       </div>
 
