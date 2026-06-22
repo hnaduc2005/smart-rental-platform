@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import { toast } from "react-hot-toast";
 
 export default function LandlordSettingsPage() {
   const [bankName, setBankName] = useState("");
@@ -25,7 +26,7 @@ export default function LandlordSettingsPage() {
         setBankAccountName(profile.bankAccountName || "");
       }
     } catch (error: any) {
-      alert("Lỗi tải thông tin: " + error.message);
+      toast.error("Lỗi tải thông tin: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -45,9 +46,9 @@ export default function LandlordSettingsPage() {
         },
         token
       });
-      alert("Cập nhật thông tin thanh toán thành công!");
+      toast.success("Cập nhật thông tin thanh toán thành công!");
     } catch (error: any) {
-      alert("Lỗi cập nhật: " + error.message);
+      toast.error("Lỗi cập nhật: " + error.message);
     } finally {
       setIsSubmitting(false);
     }

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { Button, Input } from "@/components/common";
 import styles from "./invoices.module.css";
+import { toast } from "react-hot-toast";
 
 interface Invoice {
   id: string;
@@ -66,7 +67,7 @@ export default function LandlordInvoicesPage() {
       setInvoices(invoicesData);
       setContracts(contractsData);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -85,11 +86,11 @@ export default function LandlordInvoicesPage() {
         token
       });
       if (newStatus === "PAID") {
-        alert("Xác nhận thu tiền thành công!");
+        toast.success("Xác nhận thu tiền thành công!");
       }
       fetchData(); // Reload data
     } catch (error: any) {
-      alert("Lỗi cập nhật trạng thái: " + error.message);
+      toast.error("Lỗi cập nhật trạng thái: " + error.message);
     }
   };
 
@@ -101,7 +102,7 @@ export default function LandlordInvoicesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contractId || !billingMonth || !dueDate || !roomAmount) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc.");
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
     }
     
@@ -125,7 +126,7 @@ export default function LandlordInvoicesPage() {
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert("Lỗi tạo hóa đơn: " + error.message);
+      toast.error("Lỗi tạo hóa đơn: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +134,7 @@ export default function LandlordInvoicesPage() {
 
   const handleOpenCreateModal = () => {
     if (contracts.length === 0) {
-      alert("Bạn cần tạo Hợp đồng trước khi lập Hóa đơn.");
+      toast("Bạn cần tạo Hợp đồng trước khi lập Hóa đơn.");
       return;
     }
     setContractId(contracts[0].id);

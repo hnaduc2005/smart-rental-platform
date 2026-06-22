@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button, Input } from '@/components/common';
 import { apiRequest } from '@/lib/api';
-import { getStoredAccessToken } from '@/lib/auth';
+import { getStoredAccessToken, getCurrentUser } from '@/lib/auth';
 import styles from './BookingModal.module.css';
+import { toast } from "react-hot-toast";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -24,13 +25,30 @@ export function BookingModal({ isOpen, onClose, roomId, roomTitle, roomPrice }: 
   const [message, setMessage] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  useEffect(() => {
+    if (isOpen) {
+      const userPromise = getCurrentUser();
+      if (userPromise) {
+        userPromise.then(user => {
+        if (user?.phone) {
+          setPhone(user.phone);
+        }
+      }).catch(err => console.error("Could not fetch user info for phone number", err));
+      }
+    } else {
+      setPhone('');
+      setMessage('');
+      setRequestType('visit');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
     const token = getStoredAccessToken();
     if (!token) {
-      alert('Vui lòng đăng nhập để gửi yêu cầu!');
+      toast.error('Vui lòng đăng nhập để gửi yêu cầu!');
       window.location.href = '/login';
       return;
     }
@@ -45,10 +63,10 @@ export function BookingModal({ isOpen, onClose, roomId, roomTitle, roomPrice }: 
           message: `[${requestType}] SĐT: ${phone}. Lời nhắn: ${message}`
         }
       });
-      alert('Gửi yêu cầu thành công!');
+      toast.success('Gửi yêu cầu thành công!');
       onClose();
     } catch (error) {
-      alert('Có lỗi xảy ra: ' + (error as Error).message);
+      toast.error('Có lỗi xảy ra: ' + (error as Error).message);
     } finally {
       setIsSubmitting(false);
     }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./deposits.module.css";
+import { toast } from "react-hot-toast";
 
 interface Deposit {
   id: string;
@@ -51,7 +52,7 @@ export default function LandlordDepositsPage() {
       
       setDeposits(mappedData);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu tiền cọc: " + error.message);
+      toast.error("Lỗi tải dữ liệu tiền cọc: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +72,7 @@ export default function LandlordDepositsPage() {
       });
       fetchData(); // Reload
     } catch (error: any) {
-      alert("Lỗi cập nhật trạng thái: " + error.message);
+      toast.error("Lỗi cập nhật trạng thái: " + error.message);
     }
   };
 

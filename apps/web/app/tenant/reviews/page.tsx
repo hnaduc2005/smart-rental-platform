@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./page.module.css";
+import { toast } from "react-hot-toast";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -42,7 +43,7 @@ export default function TenantReviewsPage() {
       setReviews(reviewsData);
       setContracts(contractsData);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -50,8 +51,8 @@ export default function TenantReviewsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedRoomId) return alert("Vui lòng chọn phòng để đánh giá.");
-    if (selectedRating === 0) return alert("Vui lòng chọn số sao đánh giá.");
+    if (!selectedRoomId) return toast.error("Vui lòng chọn phòng để đánh giá.");
+    if (selectedRating === 0) return toast.error("Vui lòng chọn số sao đánh giá.");
 
     setIsSubmitting(true);
     try {
@@ -67,13 +68,13 @@ export default function TenantReviewsPage() {
         },
         token
       });
-      alert("Đăng tải đánh giá thành công!");
+      toast.success("Đăng tải đánh giá thành công!");
       setSelectedRoomId("");
       setSelectedRating(0);
       setReviewContent("");
       fetchData(); // Reload reviews
     } catch (error: any) {
-      alert("Lỗi: " + error.message);
+      toast.error("Lỗi: " + error.message);
     } finally {
       setIsSubmitting(false);
     }

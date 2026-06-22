@@ -5,6 +5,7 @@ import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { CONTRACT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
+import { toast } from "react-hot-toast";
 
 export default function TenantMyRoomPage() {
   const [contract, setContract] = useState<any>(null);
@@ -23,7 +24,7 @@ export default function TenantMyRoomPage() {
         setContract(data[0]);
       }
     } catch (err: any) {
-      alert("Lỗi tải thông tin phòng: " + err.message);
+      toast.error("Lỗi tải thông tin phòng: " + err.message);
     } finally {
       setLoading(false);
     }

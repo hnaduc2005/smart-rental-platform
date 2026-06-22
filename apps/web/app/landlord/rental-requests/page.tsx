@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./rental-requests.module.css";
+import { toast } from "react-hot-toast";
 
 interface RentalRequest {
   id: string;
@@ -41,7 +42,7 @@ export default function LandlordRentalRequestsPage() {
       const data = await apiRequest<RentalRequest[]>("/rental-requests/my", { token });
       setRequests(data);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +62,7 @@ export default function LandlordRentalRequestsPage() {
       });
       fetchData(); // Reload data
     } catch (error: any) {
-      alert("Lỗi cập nhật trạng thái: " + error.message);
+      toast.error("Lỗi cập nhật trạng thái: " + error.message);
     }
   };
 

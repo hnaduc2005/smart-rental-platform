@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { Button, Input } from "@/components/common";
 import styles from "./contracts.module.css";
+import { toast } from "react-hot-toast";
 
 interface Room {
   id: string;
@@ -72,7 +73,7 @@ export default function LandlordContractsPage() {
       setRooms(roomsData);
       setTenants(tenantsData);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -94,14 +95,14 @@ export default function LandlordContractsPage() {
       });
       fetchData(); // Reload data
     } catch (error: any) {
-      alert("Lỗi cập nhật trạng thái: " + error.message);
+      toast.error("Lỗi cập nhật trạng thái: " + error.message);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomId || !tenantProfileId || !startDate || !rentAmount || !depositAmount || !paymentDueDay) {
-      alert("Vui lòng điền đầy đủ các trường bắt buộc.");
+      toast.error("Vui lòng điền đầy đủ các trường bắt buộc.");
       return;
     }
     
@@ -126,7 +127,7 @@ export default function LandlordContractsPage() {
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert("Lỗi tạo hợp đồng: " + error.message);
+      toast.error("Lỗi tạo hợp đồng: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -134,7 +135,7 @@ export default function LandlordContractsPage() {
 
   const handleOpenCreateModal = () => {
     if (rooms.length === 0) {
-      alert("Bạn cần phải có phòng trống trước khi tạo hợp đồng.");
+      toast("Bạn cần phải có phòng trống trước khi tạo hợp đồng.");
       return;
     }
     const firstRoom = rooms[0];

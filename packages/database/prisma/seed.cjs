@@ -241,42 +241,42 @@ async function main() {
   const amenities = await Promise.all([
     prisma.amenity.upsert({
       where: { slug: "wifi" },
-      update: { name: "Wifi", description: "Internet toc do cao." },
+      update: { name: "Wifi", description: "Internet tốc độ cao." },
       create: {
         id: "seed-amenity-wifi",
         name: "Wifi",
         slug: "wifi",
-        description: "Internet toc do cao."
+        description: "Internet tốc độ cao."
       }
     }),
     prisma.amenity.upsert({
       where: { slug: "air-conditioner" },
-      update: { name: "May lanh", description: "May lanh rieng trong phong." },
+      update: { name: "Máy lạnh", description: "Máy lạnh riêng trong phòng." },
       create: {
         id: "seed-amenity-air-conditioner",
-        name: "May lanh",
+        name: "Máy lạnh",
         slug: "air-conditioner",
-        description: "May lanh rieng trong phong."
+        description: "Máy lạnh riêng trong phòng."
       }
     }),
     prisma.amenity.upsert({
       where: { slug: "parking" },
-      update: { name: "Cho de xe", description: "Khu vuc de xe trong nha." },
+      update: { name: "Chỗ để xe", description: "Khu vực để xe trong nhà." },
       create: {
         id: "seed-amenity-parking",
-        name: "Cho de xe",
+        name: "Chỗ để xe",
         slug: "parking",
-        description: "Khu vuc de xe trong nha."
+        description: "Khu vực để xe trong nhà."
       }
     }),
     prisma.amenity.upsert({
       where: { slug: "private-bathroom" },
-      update: { name: "WC rieng", description: "Nha ve sinh rieng trong phong." },
+      update: { name: "WC riêng", description: "Nhà vệ sinh riêng trong phòng." },
       create: {
         id: "seed-amenity-private-bathroom",
-        name: "WC rieng",
+        name: "WC riêng",
         slug: "private-bathroom",
-        description: "Nha ve sinh rieng trong phong."
+        description: "Nhà vệ sinh riêng trong phòng."
       }
     })
   ]);

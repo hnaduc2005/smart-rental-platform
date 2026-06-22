@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { APPOINTMENT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./viewing-appointments.module.css";
+import { toast } from "react-hot-toast";
 
 interface Appointment {
   id: string;
@@ -41,7 +42,7 @@ export default function LandlordAppointmentsPage() {
       const data = await apiRequest<Appointment[]>("/viewing-appointments/my", { token });
       setAppointments(data);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +58,7 @@ export default function LandlordAppointmentsPage() {
       });
       fetchData(); // Reload data
     } catch (error: any) {
-      alert("Lỗi cập nhật trạng thái: " + error.message);
+      toast.error("Lỗi cập nhật trạng thái: " + error.message);
     }
   };
 

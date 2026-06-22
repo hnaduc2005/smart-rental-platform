@@ -29,6 +29,7 @@ export async function apiRequest<TResponse>(path: string, options: ApiRequestOpt
   }
 
   const response = await fetch(`${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`, {
+    cache: "no-store",
     ...requestOptions,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body)

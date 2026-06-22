@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/common';
 import modalStyles from './BookingModal.module.css';
 import styles from './ReviewModal.module.css';
+import { toast } from "react-hot-toast";
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -63,10 +64,10 @@ export function ReviewModal({ isOpen, onClose, roomTitle }: ReviewModalProps) {
           <Button variant="secondary" onClick={onClose}>Hủy</Button>
           <Button variant="primary" onClick={() => {
             if (rating === 0) {
-              alert('Vui lòng chọn số sao đánh giá!');
+              toast.error('Vui lòng chọn số sao đánh giá!');
               return;
             }
-            alert('Đã gửi đánh giá thành công! Cảm ơn bạn.');
+            toast.success('Đã gửi đánh giá thành công! Cảm ơn bạn.');
             onClose();
           }}>
             Gửi đánh giá

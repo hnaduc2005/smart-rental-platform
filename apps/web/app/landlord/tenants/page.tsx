@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./tenants.module.css";
+import { toast } from "react-hot-toast";
 
 export default function LandlordTenantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +23,7 @@ export default function LandlordTenantsPage() {
       const data = await apiRequest<any[]>("/tenants/my", { token });
       setTenants(data);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu khách thuê: " + error.message);
+      toast.error("Lỗi tải dữ liệu khách thuê: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -58,13 +59,13 @@ export default function LandlordTenantsPage() {
   }
 
   const handleEditInfoClick = () => {
-    alert("Tính năng đang phát triển. Khách thuê có thể tự cập nhật thông tin cá nhân trên ứng dụng di động để đảm bảo bảo mật.");
+    toast("Tính năng đang phát triển. Khách thuê có thể tự cập nhật thông tin cá nhân trên ứng dụng di động để đảm bảo bảo mật.");
   };
 
   const handleSendNotification = (e: React.FormEvent) => {
     e.preventDefault();
     if (!notifyMessage.trim()) return;
-    alert(`Đã gửi thông báo đến ${selectedTenant?.user?.fullName || "khách thuê"} thành công!`);
+    toast.success(`Đã gửi thông báo đến ${selectedTenant?.user?.fullName || "khách thuê"} thành công!`);
     setIsNotifyModalOpen(false);
     setNotifyMessage("");
     setSelectedTenant(null);

@@ -12,7 +12,8 @@
     "@smart-rental/shared": "workspace:*",
     "next": "16.2.7",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "react-hot-toast": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

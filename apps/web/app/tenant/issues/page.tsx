@@ -5,6 +5,7 @@ import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { ISSUE_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
+import { toast } from "react-hot-toast";
 
 export default function TenantIssuesPage() {
   const [issues, setIssues] = useState<any[]>([]);
@@ -41,7 +42,7 @@ export default function TenantIssuesPage() {
       }
     } catch (err: any) {
       console.error(err);
-      alert("Lỗi tải dữ liệu: " + err.message);
+      toast.error("Lỗi tải dữ liệu: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export default function TenantIssuesPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert("Kích thước ảnh quá lớn. Vui lòng chọn ảnh dưới 5MB.");
+        toast.error("Kích thước ảnh quá lớn. Vui lòng chọn ảnh dưới 5MB.");
         return;
       }
       const reader = new FileReader();
@@ -67,7 +68,7 @@ export default function TenantIssuesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.contractId || !formData.type || !formData.title) {
-      alert("Vui lòng điền đầy đủ Phòng, Loại sự cố và Tiêu đề!");
+      toast.error("Vui lòng điền đầy đủ Phòng, Loại sự cố và Tiêu đề!");
       return;
     }
 
@@ -89,12 +90,12 @@ export default function TenantIssuesPage() {
         },
         token
       });
-      alert("Gửi báo cáo thành công!");
+      toast.success("Gửi báo cáo thành công!");
       setFormData(prev => ({ ...prev, title: "", description: "", imageUrl: "" })); // reset some fields
       setImagePreview(null);
       fetchData(); // reload
     } catch (err: any) {
-      alert("Lỗi: " + err.message);
+      toast.error("Lỗi: " + err.message);
     } finally {
       setIsSubmitting(false);
     }

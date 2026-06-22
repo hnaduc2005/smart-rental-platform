@@ -6,6 +6,7 @@ import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { PAYMENT_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
+import { toast } from "react-hot-toast";
 
 function PaymentsContent() {
   const searchParams = useSearchParams();
@@ -36,7 +37,7 @@ function PaymentsContent() {
       setInvoices(invData);
       setPayments(payData);
     } catch (err: any) {
-      alert("Lỗi tải dữ liệu: " + err.message);
+      toast.error("Lỗi tải dữ liệu: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ function PaymentsContent() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert("Kích thước ảnh không được vượt quá 2MB");
+      toast("Kích thước ảnh không được vượt quá 2MB");
       return;
     }
 
@@ -65,11 +66,11 @@ function PaymentsContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.invoiceId) {
-      alert("Vui lòng chọn hóa đơn cần thanh toán!");
+      toast.error("Vui lòng chọn hóa đơn cần thanh toán!");
       return;
     }
     if (!formData.proofImageUrl) {
-      alert("Vui lòng tải lên hình ảnh biên lai!");
+      toast.error("Vui lòng tải lên hình ảnh biên lai!");
       return;
     }
 
@@ -88,12 +89,12 @@ function PaymentsContent() {
         },
         token
       });
-      alert("Gửi xác nhận thanh toán thành công!");
+      toast.success("Gửi xác nhận thanh toán thành công!");
       setFormData({ invoiceId: "", proofImageUrl: "" });
       setPreviewName("");
       fetchData(); // reload
     } catch (err: any) {
-      alert("Lỗi: " + err.message);
+      toast.error("Lỗi: " + err.message);
     } finally {
       setIsSubmitting(false);
     }

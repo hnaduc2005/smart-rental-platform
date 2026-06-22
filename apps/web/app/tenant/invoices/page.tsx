@@ -6,6 +6,7 @@ import { Badge, Button } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import { INVOICE_STATUS_MAP, translateStatus } from "@/lib/status-translators";
 import styles from "./page.module.css";
+import { toast } from "react-hot-toast";
 
 export default function TenantInvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -21,7 +22,7 @@ export default function TenantInvoicesPage() {
       const data = await apiRequest<any[]>("/invoices/tenant/my", { token });
       setInvoices(data);
     } catch (err: any) {
-      alert("Lỗi tải hóa đơn: " + err.message);
+      toast.error("Lỗi tải hóa đơn: " + err.message);
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
 import styles from "./properties.module.css";
+import { toast } from "react-hot-toast";
 
 interface Property {
   id: string;
@@ -32,7 +33,7 @@ export default function LandlordPropertiesPage() {
       const data = await apiRequest<Property[]>("/properties/my", { token });
       setProperties(data);
     } catch (error: any) {
-      alert("Lỗi tải dữ liệu: " + error.message);
+      toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +103,7 @@ export default function LandlordPropertiesPage() {
       setIsModalOpen(false);
       fetchProperties(); // Reload data
     } catch (error: any) {
-      alert("Lỗi lưu dữ liệu: " + error.message);
+      toast.error("Lỗi lưu dữ liệu: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +119,7 @@ export default function LandlordPropertiesPage() {
         });
         setProperties(properties.filter((p) => p.id !== id));
       } catch (error: any) {
-        alert("Lỗi xóa dữ liệu: " + error.message);
+        toast.error("Lỗi xóa dữ liệu: " + error.message);
       }
     }
   };
