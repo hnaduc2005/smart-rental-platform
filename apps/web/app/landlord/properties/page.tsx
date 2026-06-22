@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input } from "@/components/common";
 import { apiRequest, getStoredAccessToken } from "@/lib";
+import AddressLocationPicker from "@/components/common/Map/AddressLocationPicker";
 import styles from "./properties.module.css";
 
 interface Property {
@@ -197,39 +198,18 @@ export default function LandlordPropertiesPage() {
                     required
                   />
                 </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Địa chỉ *</label>
-                  <Input
-                    placeholder="VD: Số 12, Ngõ 45, Khương Trung..."
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required
+                <div className={styles.formGroup} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', background: '#fafafa' }}>
+                  <label className={styles.label} style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Vị trí & Địa chỉ khu trọ *</label>
+                  <AddressLocationPicker
+                    address={address}
+                    onAddressChange={setAddress}
+                    latitude={latitude}
+                    longitude={longitude}
+                    onLatitudeChange={setLatitude}
+                    onLongitudeChange={setLongitude}
                   />
-                </div>
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div className={styles.formGroup} style={{ flex: 1 }}>
-                    <label className={styles.label}>
-                      Vĩ độ (Latitude) 
-                      <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#0066cc', marginLeft: '8px' }}>(Lấy từ Google Maps)</a>
-                    </label>
-                    <Input
-                      placeholder="VD: 21.028511"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      type="number"
-                      step="any"
-                    />
-                  </div>
-                  <div className={styles.formGroup} style={{ flex: 1 }}>
-                    <label className={styles.label}>Kinh độ (Longitude)</label>
-                    <Input
-                      placeholder="VD: 105.804817"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      type="number"
-                      step="any"
-                    />
-                  </div>
+                  {/* Hidden input to ensure required validation passes if address is filled */}
+                  <input type="hidden" value={address} required />
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Mô tả chi tiết</label>

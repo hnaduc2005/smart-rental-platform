@@ -169,11 +169,12 @@
 /* Map placeholder */
 .mapWrapper {
   width: 100%;
-  height: 300px;
+  height: auto;
+  min-height: 300px;
   background: #E6ECF6;
   border-radius: 8px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   color: var(--text-medium-gray);
   font-size: 14px;

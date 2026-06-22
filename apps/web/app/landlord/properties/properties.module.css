@@ -112,8 +112,8 @@
 .modal {
   background-color: var(--bg-white);
   border-radius: 8px;
-  width: 500px;
-  max-width: 90%;
+  width: 900px;
+  max-width: 95%;
   box-shadow: var(--shadow-base);
   animation: modalOpen 0.2s ease-out;
 }
@@ -154,6 +154,8 @@
 
 .modalBody {
   padding: 24px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 .formGroup {
