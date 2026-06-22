@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Button, Badge } from '@/components/common';
+import { Badge, Button } from '@/components/common';
+import MapDisplay from '@/components/common/Map/MapDisplay';
 import { BookingModal } from '@/components/tenant';
 
 import { apiRequest } from '@/lib/api';
@@ -113,33 +114,15 @@ export default function RoomDetailsPage({ params }: PageProps) {
               </div>
             </section>
 
-            {/* Map (Placeholder) */}
+            {/* Map */}
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Vị trí trên bản đồ</h2>
-              <div className={styles.mapWrapper}>
-                {(() => {
-                  const lat = room.latitude || room.property?.latitude;
-                  const lng = room.longitude || room.property?.longitude;
-                  
-                  if (lat && lng) {
-                    return (
-                      <iframe
-                        width="100%"
-                        height="400px"
-                        style={{ border: 0, borderRadius: '8px' }}
-                        loading="lazy"
-                        allowFullScreen
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(lng) - 0.01}%2C${Number(lat) - 0.01}%2C${Number(lng) + 0.01}%2C${Number(lat) + 0.01}&layer=mapnik&marker=${Number(lat)}%2C${Number(lng)}`}
-                      ></iframe>
-                    );
-                  }
-                  return (
-                    <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>
-                      Chủ trọ chưa cập nhật tọa độ bản đồ
-                    </div>
-                  );
-                })()}
-              </div>
+              <MapDisplay 
+                latitude={room.latitude || room.property?.latitude} 
+                longitude={room.longitude || room.property?.longitude} 
+                address={room.address || room.property?.address} 
+                height="450px" 
+              />
             </section>
 
             {/* Reviews */}

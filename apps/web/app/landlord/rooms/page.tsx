@@ -22,7 +22,7 @@ interface Room {
   rules?: string;
   publicContactName?: string;
   publicContactPhone?: string;
-  amenityIds?: string[];
+  amenities?: { amenityId: string; amenity: { id: string; name: string; icon?: string } }[];
   images?: any[];
 }
 
@@ -31,12 +31,16 @@ interface Property {
   name: string;
 }
 
-// MOCK_AMENITIES removed, fetching real amenities from API
+interface Amenity {
+  id: string;
+  name: string;
+  icon?: string;
+}
 
 export default function LandlordRoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [dbAmenities, setDbAmenities] = useState<any[]>([]);
+
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
@@ -44,6 +48,7 @@ export default function LandlordRoomsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -56,12 +61,12 @@ export default function LandlordRoomsPage() {
         apiRequest<Property[]>("/properties/my", { token }),
         apiRequest<Room[]>("/rooms/my", { token }),
         getCurrentUser(token),
-        apiRequest<any[]>("/amenities", { token })
+        apiRequest<Amenity[]>("/amenities", { token })
       ]);
       setProperties(propsData);
       setRooms(roomsData);
       setCurrentUser(user);
-      setDbAmenities(amenitiesData);
+      setAllAmenities(amenitiesData);
     } catch (error: any) {
       toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
@@ -116,7 +121,9 @@ export default function LandlordRoomsPage() {
     setRules(room.rules || "");
     setPublicContactName(room.publicContactName || "");
     setPublicContactPhone(room.publicContactPhone || "");
-    setAmenityIds(room.amenityIds || []);
+    // Extract amenityIds from the nested amenities array returned by API
+    const ids = room.amenities?.map((ra) => ra.amenityId) || [];
+    setAmenityIds(ids);
     setImages(room.images || []);
     setIsModalOpen(true);
   };
@@ -144,7 +151,6 @@ export default function LandlordRoomsPage() {
         publicContactName,
         publicContactPhone,
         amenityIds: amenityIds.length > 0 ? amenityIds : undefined,
-        // images: images.length > 0 ? images : undefined,
       };
 
       if (editingRoom) {
@@ -377,21 +383,25 @@ export default function LandlordRoomsPage() {
 
                   <div className={styles.formGroupFull}>
                     <label className={styles.label}>Tiện ích phòng</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", padding: "12px", border: "1px solid var(--border-light)", borderRadius: "8px" }}>
-                      {dbAmenities.map((am) => (
-                        <label key={am.id} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13.5px", cursor: "pointer", minWidth: "120px" }}>
-                          <input 
-                            type="checkbox" 
-                            checked={amenityIds.includes(am.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) setAmenityIds([...amenityIds, am.id]);
-                              else setAmenityIds(amenityIds.filter(id => id !== am.id));
-                            }}
-                          />
-                          <span>✨ {am.name}</span>
-                        </label>
-                      ))}
-                    </div>
+                    {allAmenities.length === 0 ? (
+                      <p style={{ fontSize: '13px', color: 'var(--text-medium-gray)' }}>Chưa có tiện ích nào trong hệ thống. Vui lòng liên hệ admin.</p>
+                    ) : (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", padding: "12px", border: "1px solid var(--border-light)", borderRadius: "8px" }}>
+                        {allAmenities.map((am) => (
+                          <label key={am.id} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13.5px", cursor: "pointer", minWidth: "120px" }}>
+                            <input 
+                              type="checkbox" 
+                              checked={amenityIds.includes(am.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) setAmenityIds([...amenityIds, am.id]);
+                                else setAmenityIds(amenityIds.filter(id => id !== am.id));
+                              }}
+                            />
+                            <span>{am.icon || '✨'} {am.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.formGroup}>
