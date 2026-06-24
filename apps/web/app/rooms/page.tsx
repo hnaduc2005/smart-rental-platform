@@ -84,11 +84,22 @@ function RoomsContent() {
       );
     }
 
-    // Province (Region)
-    if (filters.province) list = list.filter((r) => r.regionId === filters.province || r.region?.parentId === filters.province);
+    // Province (Region): room's region is a province OR room's region is a district whose parent is the province
+    if (filters.province) {
+      list = list.filter((r) => {
+        if (!r.regionId) return false;
+        // Direct match (room region IS the province)
+        if (r.regionId === filters.province) return true;
+        // Indirect match (room region is a district under the province)
+        if (r.region?.parentId === filters.province) return true;
+        // Also check property region as fallback
+        if (r.property?.regionId === filters.province) return true;
+        return false;
+      });
+    }
 
     // District
-    if (filters.district) list = list.filter((r) => r.regionId === filters.district);
+    if (filters.district) list = list.filter((r) => r.regionId === filters.district || r.property?.regionId === filters.district);
 
     // Price
     list = list.filter((r) => Number(r.price) >= filters.minPrice && Number(r.price) <= filters.maxPrice);

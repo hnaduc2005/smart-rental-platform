@@ -29,7 +29,9 @@ export class RoomsService {
               }
             }
           },
-          region: true,
+          region: {
+            include: { parent: true }
+          },
           roomType: true,
           images: {
             orderBy: { sortOrder: "asc" }
