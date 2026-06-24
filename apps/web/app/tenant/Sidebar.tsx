@@ -49,7 +49,8 @@ export default function TenantSidebar() {
   const fetchProfile = () => {
     const token = getStoredAccessToken();
     if (token) {
-      getCurrentUser(token).then(setUser).catch(() => setUser(null));
+      const p = getCurrentUser(token);
+      if (p) p.then(setUser).catch(() => setUser(null));
     } else {
       setUser(null);
     }

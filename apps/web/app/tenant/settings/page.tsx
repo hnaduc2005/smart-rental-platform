@@ -19,8 +19,9 @@ export default function TenantSettingsPage() {
 
   // Load from API on mount
   useEffect(() => {
-    getCurrentUser()
-      .then(user => {
+    const userPromise = getCurrentUser();
+    if (userPromise) {
+      userPromise.then(user => {
         if (user) {
           setProfile({
             fullName: user.fullName || '',
@@ -34,6 +35,9 @@ export default function TenantSettingsPage() {
       })
       .catch(console.error)
       .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   // Password form state
