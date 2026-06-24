@@ -76,12 +76,20 @@ function RoomsContent() {
   const results = useMemo(() => {
     let list = [...rooms];
 
+    // Helper to remove diacritics for search
+    const removeDiacritics = (str: string) => {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
     // Search query
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (r) => r.name?.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q)
-      );
+      const q = removeDiacritics(searchQuery.trim());
+      list = list.filter((r) => {
+        const nameMatch = r.name ? removeDiacritics(r.name).includes(q) : false;
+        const addressMatch = r.address ? removeDiacritics(r.address).includes(q) : false;
+        const regionMatch = r.region?.name ? removeDiacritics(r.region.name).includes(q) : false;
+        return nameMatch || addressMatch || regionMatch;
+      });
     }
 
     // Province (Region): room's region is a province OR room's region is a district whose parent is the province
