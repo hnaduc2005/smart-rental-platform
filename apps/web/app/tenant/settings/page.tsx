@@ -1,20 +1,43 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input, Button } from '@/components/common';
 import styles from './page.module.css';
+import { getCurrentUser, updateProfile as updateProfileApi, changePassword } from '@/lib/auth';
 
 export default function TenantSettingsPage() {
   const [profile, setProfile] = useState({
-    fullName: 'Người Thuê Test',
-    phone: '0987654321',
-    email: 'nguoithue@test.com'
+    fullName: '',
+    phone: '',
+    email: ''
   });
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load from API on mount
+  useEffect(() => {
+    getCurrentUser()
+      .then(user => {
+        if (user) {
+          setProfile({
+            fullName: user.fullName || '',
+            phone: user.phone || '',
+            email: user.email || ''
+          });
+          if (user.avatarUrl) {
+            setAvatarPreview(user.avatarUrl);
+          }
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
 
   // Password form state
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [pwForm, setPwForm] = useState({
     current: '',
     newPw: '',
@@ -32,16 +55,43 @@ export default function TenantSettingsPage() {
     promo: true
   });
 
-  const handleSaveProfile = () => {
-    setProfileSuccess(true);
-    setTimeout(() => setProfileSuccess(false), 3000);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      await updateProfileApi({
+        fullName: profile.fullName,
+        phone: profile.phone,
+        avatarUrl: avatarPreview || undefined
+      });
+      
+      // Dispatch event so Sidebar can update in real-time
+      window.dispatchEvent(new Event('profileUpdated'));
+
+      setIsEditingProfile(false);
+      setProfileSuccess(true);
+      setTimeout(() => setProfileSuccess(false), 3000);
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      alert("Đã xảy ra lỗi khi lưu thông tin. Vui lòng thử lại.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setAvatarPreview(url);
+    
+    // Convert to base64 for localstorage persistence
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setAvatarPreview(base64String);
+      // We don't save to localStorage yet until they click Save changes
+    };
+    reader.readAsDataURL(file);
   };
 
   // Password validation — theo đúng chuẩn hệ thống: minLength 8
@@ -69,10 +119,22 @@ export default function TenantSettingsPage() {
     setPwErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      // Thành công — reset form
-      setPwForm({ current: '', newPw: '', confirm: '' });
-      setPwSuccess(true);
-      setTimeout(() => setPwSuccess(false), 3000);
+      changePassword({
+        currentPassword: pwForm.current,
+        newPassword: pwForm.newPw
+      }).then(() => {
+        // Thành công — reset form
+        setPwForm({ current: '', newPw: '', confirm: '' });
+        setIsChangingPassword(false);
+        setPwSuccess(true);
+        setTimeout(() => setPwSuccess(false), 3000);
+      }).catch((err) => {
+        if (err.message?.includes('hiện tại không chính xác')) {
+          setPwErrors({ current: 'Mật khẩu hiện tại không chính xác.' });
+        } else {
+          setPwErrors({ current: 'Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.' });
+        }
+      });
     }
   };
 
@@ -93,6 +155,7 @@ export default function TenantSettingsPage() {
             accept="image/jpeg,image/png,image/gif"
             style={{ display: 'none' }}
             onChange={handleAvatarChange}
+            disabled={!isEditingProfile}
           />
           <div className={styles.avatarPreview}>
             {avatarPreview ? (
@@ -106,6 +169,7 @@ export default function TenantSettingsPage() {
               variant="secondary"
               style={{ marginBottom: '8px' }}
               onClick={() => fileInputRef.current?.click()}
+              disabled={!isEditingProfile}
             >
               Tải ảnh mới lên
             </Button>
@@ -119,6 +183,7 @@ export default function TenantSettingsPage() {
             <Input
               value={profile.fullName}
               onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+              disabled={!isEditingProfile}
             />
           </div>
           <div className={styles.formGroup}>
@@ -126,6 +191,7 @@ export default function TenantSettingsPage() {
             <Input
               value={profile.phone}
               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+              disabled={!isEditingProfile}
             />
           </div>
         </div>
@@ -144,7 +210,16 @@ export default function TenantSettingsPage() {
         {profileSuccess && (
           <div className={styles.successBanner}>✅ Đã cập nhật thông tin thành công!</div>
         )}
-        <Button variant="primary" onClick={handleSaveProfile}>Lưu thay đổi</Button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {!isEditingProfile ? (
+            <Button variant="secondary" onClick={() => setIsEditingProfile(true)}>Thay đổi thông tin</Button>
+          ) : (
+            <>
+              <Button variant="primary" onClick={handleSaveProfile}>Lưu thay đổi</Button>
+              <Button variant="secondary" onClick={() => setIsEditingProfile(false)}>Hủy</Button>
+            </>
+          )}
+        </div>
       </section>
 
       {/* Security Section */}
@@ -156,8 +231,9 @@ export default function TenantSettingsPage() {
             <label className={styles.label}>Mật khẩu hiện tại</label>
             <Input
               type="password"
-              placeholder="Nhập mật khẩu hiện tại"
-              value={pwForm.current}
+              placeholder={isChangingPassword ? "Nhập mật khẩu hiện tại" : "••••••••"}
+              value={isChangingPassword ? pwForm.current : "********"}
+              disabled={!isChangingPassword}
               onChange={(e) => {
                 setPwForm({ ...pwForm, current: e.target.value });
                 setPwErrors({ ...pwErrors, current: undefined });
@@ -167,54 +243,70 @@ export default function TenantSettingsPage() {
           </div>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Mật khẩu mới</label>
-            <Input
-              type="password"
-              placeholder="Tối thiểu 8 ký tự"
-              value={pwForm.newPw}
-              onChange={(e) => {
-                setPwForm({ ...pwForm, newPw: e.target.value });
-                setPwErrors({ ...pwErrors, newPw: undefined });
-              }}
-            />
-            {pwErrors.newPw && <span className={styles.errorText}>{pwErrors.newPw}</span>}
-            {/* Strength indicator */}
-            {pwForm.newPw.length > 0 && (
-              <div className={styles.strengthBar}>
-                <div
-                  className={styles.strengthFill}
-                  style={{
-                    width: pwForm.newPw.length >= 12 ? '100%' : pwForm.newPw.length >= 8 ? '60%' : '25%',
-                    background: pwForm.newPw.length >= 12 ? 'var(--color-success, #16a34a)' : pwForm.newPw.length >= 8 ? '#f59e0b' : 'var(--color-error, #dc2626)'
-                  }}
-                />
-                <span className={styles.strengthLabel}>
-                  {pwForm.newPw.length >= 12 ? 'Mạnh' : pwForm.newPw.length >= 8 ? 'Trung bình' : 'Yếu'}
-                </span>
-              </div>
-            )}
+        {isChangingPassword && (
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Mật khẩu mới</label>
+              <Input
+                type="password"
+                placeholder="Tối thiểu 8 ký tự"
+                value={pwForm.newPw}
+                onChange={(e) => {
+                  setPwForm({ ...pwForm, newPw: e.target.value });
+                  setPwErrors({ ...pwErrors, newPw: undefined });
+                }}
+              />
+              {pwErrors.newPw && <span className={styles.errorText}>{pwErrors.newPw}</span>}
+              {/* Strength indicator */}
+              {pwForm.newPw.length > 0 && (
+                <div className={styles.strengthBar}>
+                  <div
+                    className={styles.strengthFill}
+                    style={{
+                      width: pwForm.newPw.length >= 12 ? '100%' : pwForm.newPw.length >= 8 ? '60%' : '25%',
+                      background: pwForm.newPw.length >= 12 ? 'var(--color-success, #16a34a)' : pwForm.newPw.length >= 8 ? '#f59e0b' : 'var(--color-error, #dc2626)'
+                    }}
+                  />
+                  <span className={styles.strengthLabel}>
+                    {pwForm.newPw.length >= 12 ? 'Mạnh' : pwForm.newPw.length >= 8 ? 'Trung bình' : 'Yếu'}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Xác nhận mật khẩu mới</label>
+              <Input
+                type="password"
+                placeholder="Nhập lại mật khẩu mới"
+                value={pwForm.confirm}
+                onChange={(e) => {
+                  setPwForm({ ...pwForm, confirm: e.target.value });
+                  setPwErrors({ ...pwErrors, confirm: undefined });
+                }}
+              />
+              {pwErrors.confirm && <span className={styles.errorText}>{pwErrors.confirm}</span>}
+            </div>
           </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Xác nhận mật khẩu mới</label>
-            <Input
-              type="password"
-              placeholder="Nhập lại mật khẩu mới"
-              value={pwForm.confirm}
-              onChange={(e) => {
-                setPwForm({ ...pwForm, confirm: e.target.value });
-                setPwErrors({ ...pwErrors, confirm: undefined });
-              }}
-            />
-            {pwErrors.confirm && <span className={styles.errorText}>{pwErrors.confirm}</span>}
-          </div>
-        </div>
+        )}
 
         {pwSuccess && (
           <div className={styles.successBanner}>✅ Đổi mật khẩu thành công!</div>
         )}
-        <Button variant="secondary" onClick={handleChangePassword}>Đổi mật khẩu</Button>
+        
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {!isChangingPassword ? (
+            <Button variant="secondary" onClick={() => setIsChangingPassword(true)}>Thay đổi mật khẩu</Button>
+          ) : (
+            <>
+              <Button variant="primary" onClick={handleChangePassword}>Lưu thay đổi</Button>
+              <Button variant="secondary" onClick={() => {
+                setIsChangingPassword(false);
+                setPwForm({ current: '', newPw: '', confirm: '' });
+                setPwErrors({});
+              }}>Hủy</Button>
+            </>
+          )}
+        </div>
       </section>
 
       {/* Notifications Section */}

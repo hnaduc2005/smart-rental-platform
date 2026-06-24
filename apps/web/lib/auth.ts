@@ -8,6 +8,7 @@ export type AuthUser = {
   email: string;
   phone: string | null;
   fullName: string | null;
+  avatarUrl: string | null;
   role: AuthRole;
   status: AuthStatus;
 };
@@ -86,6 +87,30 @@ export function getCurrentUser(token = getStoredAccessToken()) {
 
   return apiRequest<AuthUser>("/auth/me", {
     method: "GET",
+    token
+  });
+}
+
+export function updateProfile(payload: { fullName?: string; phone?: string; avatarUrl?: string }, token = getStoredAccessToken()) {
+  if (!token) {
+    return Promise.reject(new Error("No access token"));
+  }
+
+  return apiRequest<AuthUser>("/users/profile", {
+    method: "PUT",
+    body: payload,
+    token
+  });
+}
+
+export function changePassword(payload: { currentPassword: string; newPassword: string }, token = getStoredAccessToken()) {
+  if (!token) {
+    return Promise.reject(new Error("No access token"));
+  }
+
+  return apiRequest<any>("/users/password", {
+    method: "PUT",
+    body: payload,
     token
   });
 }

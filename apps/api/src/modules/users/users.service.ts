@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { Prisma, Role, UserStatus } from "@smart-rental/database";
 import bcrypt from "bcryptjs";
 import { AuthenticatedUser } from "../../common/types/authenticated-user";
@@ -73,6 +73,32 @@ export class UsersService {
     });
   }
 
+  updateProfile(id: string, data: { fullName?: string; phone?: string; avatarUrl?: string }) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      include: userProfileInclude
+    });
+  }
+
+  async changePassword(id: string, currentPw: string, newPw: string) {
+    const user = await this.findById(id);
+    if (!user || !user.passwordHash) {
+      throw new BadRequestException("Tài khoản không tồn tại hoặc không hỗ trợ mật khẩu");
+    }
+
+    const isValid = await bcrypt.compare(currentPw, user.passwordHash);
+    if (!isValid) {
+      throw new BadRequestException("Mật khẩu hiện tại không chính xác");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPw, 10);
+    return this.prisma.user.update({
+      where: { id },
+      data: { passwordHash: hashedPassword }
+    });
+  }
+
   async validateUserPassword(email: string, password: string) {
     const user = await this.findByEmail(email);
 
@@ -95,6 +121,7 @@ export class UsersService {
     email: string;
     phone: string | null;
     fullName: string | null;
+    avatarUrl: string | null;
     role: Role;
     status: UserStatus;
   }): AuthenticatedUser {
@@ -102,6 +129,7 @@ export class UsersService {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+      avatarUrl: user.avatarUrl,
       phone: user.phone,
       role: user.role,
       status: user.status

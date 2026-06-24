@@ -20,16 +20,26 @@ export function Navbar() {
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   useEffect(() => {
-    const token = getStoredAccessToken();
-    if (token) {
-      getCurrentUser(token)
-        ?.then((data) => {
-          if (data) setUser(data);
-        })
-        .finally(() => setIsAuthChecking(false));
-    } else {
-      setIsAuthChecking(false);
-    }
+    const fetchUser = () => {
+      const token = getStoredAccessToken();
+      if (token) {
+        getCurrentUser(token)
+          ?.then((data) => {
+            if (data) setUser(data);
+            else setUser(null);
+          })
+          .catch(() => setUser(null))
+          .finally(() => setIsAuthChecking(false));
+      } else {
+        setUser(null);
+        setIsAuthChecking(false);
+      }
+    };
+
+    fetchUser();
+
+    window.addEventListener('profileUpdated', fetchUser);
+    return () => window.removeEventListener('profileUpdated', fetchUser);
   }, [pathname]); // Re-check when route changes, just in case
 
   const handleLogout = () => {
@@ -96,9 +106,13 @@ export function Navbar() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
                     width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--color-deep-blue)',
-                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', overflow: 'hidden'
                   }}>
-                    {user.fullName ? user.fullName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      user.fullName ? user.fullName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-charcoal)' }}>{user.fullName || user.email.split('@')[0]}</span>

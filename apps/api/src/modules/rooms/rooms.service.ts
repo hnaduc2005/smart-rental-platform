@@ -26,7 +26,8 @@ export class RoomsService {
             include: {
               landlord: {
                 include: { user: true }
-              }
+              },
+              region: true
             }
           },
           region: {

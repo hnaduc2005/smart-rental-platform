@@ -44,12 +44,22 @@ export default function TenantSidebar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [localAvatar, setLocalAvatar] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchProfile = () => {
     const token = getStoredAccessToken();
     if (token) {
-      getCurrentUser(token)?.then(setUser).catch(() => {});
+      getCurrentUser(token).then(setUser).catch(() => setUser(null));
+    } else {
+      setUser(null);
     }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+
+    window.addEventListener('profileUpdated', fetchProfile);
+    return () => window.removeEventListener('profileUpdated', fetchProfile);
   }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
@@ -116,7 +126,13 @@ export default function TenantSidebar() {
         <div className={styles.sidebarFooter}>
           {/* User Info Block (Moved to bottom) */}
           <div className={styles.sidebarUserBlock}>
-            <div className={styles.sidebarAvatar}>{avatarLetter}</div>
+            <div className={styles.sidebarAvatar}>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              ) : (
+                avatarLetter
+              )}
+            </div>
             <div className={styles.sidebarUserInfo}>
               <p className={styles.sidebarUserName}>{user?.fullName || "Khách thuê"}</p>
               <span className={styles.sidebarRoleBadge}>
