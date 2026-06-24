@@ -37,6 +37,12 @@ interface Amenity {
   icon?: string;
 }
 
+interface RoomType {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export default function LandlordRoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -49,6 +55,7 @@ export default function LandlordRoomsPage() {
 
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
+  const [allRoomTypes, setAllRoomTypes] = useState<RoomType[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -57,16 +64,18 @@ export default function LandlordRoomsPage() {
   const fetchData = async () => {
     try {
       const token = getStoredAccessToken();
-      const [propsData, roomsData, user, amenitiesData] = await Promise.all([
+      const [propsData, roomsData, user, amenitiesData, roomTypesData] = await Promise.all([
         apiRequest<Property[]>("/properties/my", { token }),
         apiRequest<Room[]>("/rooms/my", { token }),
         getCurrentUser(token),
-        apiRequest<Amenity[]>("/amenities", { token })
+        apiRequest<Amenity[]>("/amenities", { token }),
+        apiRequest<RoomType[]>("/room-types")
       ]);
       setProperties(propsData);
       setRooms(roomsData);
       setCurrentUser(user);
       setAllAmenities(amenitiesData);
+      setAllRoomTypes(roomTypesData);
     } catch (error: any) {
       toast.error("Lỗi tải dữ liệu: " + error.message);
     } finally {
@@ -76,6 +85,7 @@ export default function LandlordRoomsPage() {
 
   // Form states
   const [propertyId, setPropertyId] = useState("");
+  const [roomTypeId, setRoomTypeId] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [area, setArea] = useState("");
@@ -88,6 +98,20 @@ export default function LandlordRoomsPage() {
   const [amenityIds, setAmenityIds] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImages(prev => [...prev, base64String]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleOpenCreateModal = () => {
     if (properties.length === 0) {
       toast("Bạn cần tạo ít nhất 1 Khu trọ trước khi thêm phòng.");
@@ -95,6 +119,7 @@ export default function LandlordRoomsPage() {
     }
     setEditingRoom(null);
     setPropertyId(properties[0].id);
+    setRoomTypeId(allRoomTypes[0]?.id || "");
     setName("");
     setPrice("");
     setArea("");
@@ -112,6 +137,7 @@ export default function LandlordRoomsPage() {
   const handleOpenEditModal = (room: Room) => {
     setEditingRoom(room);
     setPropertyId(room.propertyId);
+    setRoomTypeId((room as any).roomTypeId || "");
     setName(room.name);
     setPrice(room.price.toString());
     setArea(room.area.toString());
@@ -121,10 +147,10 @@ export default function LandlordRoomsPage() {
     setRules(room.rules || "");
     setPublicContactName(room.publicContactName || "");
     setPublicContactPhone(room.publicContactPhone || "");
-    // Extract amenityIds from the nested amenities array returned by API
     const ids = room.amenities?.map((ra) => ra.amenityId) || [];
     setAmenityIds(ids);
-    setImages(room.images || []);
+    const imageUrls = room.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [];
+    setImages(imageUrls);
     setIsModalOpen(true);
   };
 
@@ -134,14 +160,21 @@ export default function LandlordRoomsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !area || !maxOccupants) return;
+
+    // Chỉ Nhà nguyên căn mới tự lấy tên khu trọ, các loại khác vẫn nhập tấy tên
+    const selectedSlug = allRoomTypes.find(rt => rt.id === roomTypeId)?.slug;
+    const isAutoName = selectedSlug === "nha-nguyen-can";
+    const effectiveName = isAutoName ? (properties.find(p => p.id === propertyId)?.name || name) : name;
+
+    if (!effectiveName || !price || !area || !maxOccupants) return;
     setIsSubmitting(true);
 
     try {
       const token = getStoredAccessToken();
       const payload = {
         propertyId,
-        name,
+        roomTypeId: roomTypeId || undefined,
+        name: effectiveName,
         price: Number(price),
         area: Number(area),
         maxOccupants: Number(maxOccupants),
@@ -151,6 +184,7 @@ export default function LandlordRoomsPage() {
         publicContactName,
         publicContactPhone,
         amenityIds: amenityIds.length > 0 ? amenityIds : undefined,
+        images: images.length > 0 ? images : undefined,
       };
 
       if (editingRoom) {
@@ -246,7 +280,7 @@ export default function LandlordRoomsPage() {
             <div key={room.id} className={styles.card}>
               <div className={styles.imageContainer}>
                 {room.images && room.images.length > 0 ? (
-                  <div style={{ backgroundImage: "url('https://placehold.co/400x200?text=Room+Image')", backgroundSize: "cover", backgroundPosition: "center", width: "100%", height: "100%" }}></div>
+                  <div style={{ backgroundImage: `url('${room.images[0]?.url || room.images[0]}')`, backgroundSize: "cover", backgroundPosition: "center", width: "100%", height: "100%" }}></div>
                 ) : "🏠"}
                 <span className={`${styles.statusBadge} ${badgeClass}`}>
                   {statusText}
@@ -256,6 +290,11 @@ export default function LandlordRoomsPage() {
                 <div>
                   <h3 className={styles.roomName}>{room.name}</h3>
                   <p className={styles.propertyName}>🏬 Khu: {room.property?.name || room.propertyName || "Không xác định"}</p>
+                  {(room as any).roomType && (
+                    <span style={{ display: "inline-block", fontSize: "11px", fontWeight: 600, color: "var(--color-deep-blue)", background: "#E6ECF6", borderRadius: "4px", padding: "2px 8px", marginBottom: "4px" }}>
+                      {(room as any).roomType.name}
+                    </span>
+                  )}
                   <div className={styles.specs}>
                     <span>📐 {room.area} m²</span>
                     <span>👥 Tối đa: {room.maxOccupants} người</span>
@@ -314,14 +353,47 @@ export default function LandlordRoomsPage() {
                     </select>
                   </div>
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Tên phòng *</label>
-                    <Input
-                      placeholder="VD: Phòng 101"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
+                    <label className={styles.label}>Loại hình phòng *</label>
+                    <select
+                      className={styles.select}
+                      value={roomTypeId}
+                      onChange={(e) => setRoomTypeId(e.target.value)}
+                    >
+                      <option value="">-- Chọn loại hình --</option>
+                      {allRoomTypes.map((rt) => (
+                        <option key={rt.id} value={rt.id}>
+                          {rt.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                  {/* Ẩn tên phòng chỉ khi là Nhà nguyên căn, Căn hộ vẫn cần tên */}
+                  {allRoomTypes.find(rt => rt.id === roomTypeId)?.slug !== "nha-nguyen-can" && (
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>
+                        {allRoomTypes.find(rt => rt.id === roomTypeId)?.slug === "can-ho"
+                          ? "Tên căn hộ *"
+                          : "Tên phòng *"}
+                      </label>
+                      <Input
+                        placeholder={
+                          allRoomTypes.find(rt => rt.id === roomTypeId)?.slug === "can-ho"
+                            ? "VD: Căn 1201, Căn A-05"
+                            : "VD: Phòng 101"
+                        }
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+                  {allRoomTypes.find(rt => rt.id === roomTypeId)?.slug === "nha-nguyen-can" && (
+                    <div className={styles.formGroup} style={{ gridColumn: "1 / -1" }}>
+                      <p style={{ margin: 0, fontSize: "13px", color: "var(--color-deep-blue)", background: "#E6ECF6", borderRadius: "6px", padding: "10px 14px", fontWeight: 500 }}>
+                        ℹ️ Nhà nguyên căn — tên bài đăng tự lấy theo tên khu trọ: <strong>{properties.find(p => p.id === propertyId)?.name || ""}</strong>
+                      </p>
+                    </div>
+                  )}
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Giá thuê (VND/tháng) *</label>
                     <Input
@@ -366,19 +438,23 @@ export default function LandlordRoomsPage() {
                   </div>
                   
                   <div className={styles.formGroupFull}>
-                    <label className={styles.label}>Hình ảnh phòng (Mockup)</label>
+                    <label className={styles.label}>Hình ảnh phòng</label>
                     <div style={{ display: "flex", gap: "12px", marginBottom: "8px", overflowX: "auto" }}>
-                      {images.map((img, idx) => (
-                        <div key={idx} style={{ width: "80px", height: "80px", backgroundColor: "#E6ECF6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0 }}>
-                          <span style={{ fontSize: "12px", color: "var(--color-deep-blue)" }}>Ảnh {idx + 1}</span>
+                      {images.map((img, idx) => {
+                        const isUrl = img.startsWith('http');
+                        const isBase64 = img.startsWith('data:image');
+                        const backgroundUrl = isUrl || isBase64 ? img : `https://placehold.co/400x400?text=Image+${idx+1}`;
+                        return (
+                        <div key={idx} style={{ width: "80px", height: "80px", backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: "#E6ECF6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0 }}>
                           <button type="button" onClick={() => setImages(images.filter((_, i) => i !== idx))} style={{ position: "absolute", top: "-5px", right: "-5px", background: "red", color: "white", borderRadius: "50%", width: "20px", height: "20px", border: "none", cursor: "pointer", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>×</button>
                         </div>
-                      ))}
-                      <button type="button" onClick={() => setImages([...images, `https://mock.image/img-${Date.now()}.jpg`])} style={{ width: "80px", height: "80px", border: "1px dashed var(--border-gray)", borderRadius: "8px", background: "none", cursor: "pointer", color: "var(--text-light-gray)", fontSize: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      )})}
+                      <label style={{ width: "80px", height: "80px", border: "1px dashed var(--border-gray)", borderRadius: "8px", background: "none", cursor: "pointer", color: "var(--text-light-gray)", fontSize: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         +
-                      </button>
+                        <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: "none" }} />
+                      </label>
                     </div>
-                    <p style={{ fontSize: "12px", color: "var(--text-medium-gray)", margin: 0 }}>* Bấm dấu + để giả lập tải ảnh lên.</p>
+                    <p style={{ fontSize: "12px", color: "var(--text-medium-gray)", margin: 0 }}>* Bấm dấu + để tải lên một hoặc nhiều ảnh phòng từ máy của bạn.</p>
                   </div>
 
                   <div className={styles.formGroupFull}>

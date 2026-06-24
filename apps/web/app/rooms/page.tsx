@@ -211,8 +211,8 @@ function RoomsContent() {
                   title={room.name}
                   price={Number(room.price)}
                   area={Number(room.area)}
-                  address={room.address || ''}
-                  imageUrl={room.images?.[0]?.url || ''}
+                  address={[room.address, room.region?.name].filter(Boolean).join(', ') || 'Chưa cập nhật địa chỉ'}
+                  imageUrl={room.images?.[0]?.url || room.images?.[0] || ''}
                   onClick={() => router.push(`/rooms/${room.id}`)}
                 />
               ))}

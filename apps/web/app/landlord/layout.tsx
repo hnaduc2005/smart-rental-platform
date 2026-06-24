@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./layout.module.css";
 import { getCurrentUser, getStoredAccessToken, clearStoredAccessToken, type AuthUser } from "@/lib/auth";
+import { apiRequest } from "@/lib/api";
 
 interface LandlordLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingRequests, setPendingRequests] = useState(0);
 
   useEffect(() => {
     // Basic auth check on mount
@@ -30,6 +32,21 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
           router.push("/login");
         } else {
           setUser(data);
+          // Lấy số lượng yêu cầu thuê đang chờ xử lý và chưa đọc
+          apiRequest<any[]>("/rental-requests/my", { token: token as string })
+            .then((requests) => {
+              const lastSeenStr = localStorage.getItem("lastSeenRentalRequestsAt");
+              const lastSeenTime = lastSeenStr ? new Date(lastSeenStr).getTime() : 0;
+              
+              const unreadPending = requests.filter((r) => {
+                if (r.status !== "PENDING") return false;
+                const createdAtTime = new Date(r.createdAt).getTime();
+                return createdAtTime > lastSeenTime;
+              }).length;
+              
+              setPendingRequests(unreadPending);
+            })
+            .catch((err) => console.error("Failed to load rental requests count:", err));
         }
       })
       .catch(() => {
@@ -40,10 +57,16 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
       });
   }, [router]);
 
-  // Check token existence on route changes
+  // Check token existence on route changes and clear badge if visiting rental-requests
   useEffect(() => {
     if (!isLoading && !getStoredAccessToken()) {
       router.push("/login");
+    }
+    
+    // Nếu người dùng vào trang yêu cầu thuê, cập nhật thời gian đã xem và xóa badge
+    if (pathname === "/landlord/rental-requests") {
+      localStorage.setItem("lastSeenRentalRequestsAt", new Date().toISOString());
+      setPendingRequests(0);
     }
   }, [pathname, router, isLoading]);
 
@@ -95,7 +118,12 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
                 className={`${styles.navItem} ${isActive ? styles.active : ""}`}
               >
                 <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.href === "/landlord/rental-requests" && pendingRequests > 0 && (
+                  <span style={{ background: "var(--color-error)", color: "white", fontSize: "12px", fontWeight: "bold", padding: "2px 8px", borderRadius: "12px", marginLeft: "auto" }}>
+                    {pendingRequests}
+                  </span>
+                )}
               </Link>
             );
           })}
