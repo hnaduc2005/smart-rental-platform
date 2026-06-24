@@ -27,6 +27,7 @@ export default function RoomDetailsPage({ params }: PageProps) {
   const roomId = unwrappedParams.id;
   
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [room, setRoom] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +52,13 @@ export default function RoomDetailsPage({ params }: PageProps) {
   if (!room) {
     notFound();
   }
+
+  const handleCopyPhone = (phone: string) => {
+    if (!phone || phone === 'Chưa cập nhật') return;
+    navigator.clipboard.writeText(phone);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const roomAmenities = room.amenities?.map((ra: any) => ra.amenity) || [];
   const reviews = room.reviews || [];
@@ -116,7 +124,25 @@ export default function RoomDetailsPage({ params }: PageProps) {
 
             {/* Map */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Vị trí trên bản đồ</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 className={styles.sectionTitle} style={{ margin: 0, border: 'none', padding: 0 }}>Vị trí trên bản đồ</h2>
+                {(room.address || room.property?.address || room.latitude || room.property?.latitude) && (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${
+                      (room.latitude || room.property?.latitude) && (room.longitude || room.property?.longitude)
+                        ? `${room.latitude || room.property?.latitude},${room.longitude || room.property?.longitude}`
+                        : encodeURIComponent(room.address || room.property?.address || '')
+                    }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '13px', color: 'var(--color-deep-blue)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', backgroundColor: '#F1F5F9', padding: '6px 12px', borderRadius: '100px', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E2E8F0'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F1F5F9'}
+                  >
+                    🗺️ Xem trên Google Maps
+                  </a>
+                )}
+              </div>
               <MapDisplay 
                 latitude={room.latitude || room.property?.latitude} 
                 longitude={room.longitude || room.property?.longitude} 
@@ -170,11 +196,46 @@ export default function RoomDetailsPage({ params }: PageProps) {
               
               <div className={styles.contactActions}>
                 <Button variant="cta" style={{ width: '100%' }} onClick={() => setIsBookingOpen(true)}>
-                  📞 Đặt hẹn / Gửi yêu cầu thuê
+                  Gửi yêu cầu thuê
                 </Button>
-                <Button variant="secondary" style={{ width: '100%' }}>
-                  💬 Nhắn tin trực tiếp
-                </Button>
+                <div style={{ padding: '16px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', marginTop: '4px' }}>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text-medium-gray)', fontWeight: 600 }}>SĐT / Zalo liên hệ:</p>
+                  <div 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      backgroundColor: 'white',
+                      padding: '12px 14px',
+                      borderRadius: '6px',
+                      border: '1px solid #CBD5E1',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                    }}
+                    onClick={() => handleCopyPhone(room.publicContactPhone || room.property?.landlord?.user?.phone || room.landlord?.phone || 'Chưa cập nhật')}
+                    title="Nhấn để sao chép"
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-deep-blue)'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = '#CBD5E1'}
+                  >
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--color-deep-blue)', letterSpacing: '0.5px' }}>
+                      {room.publicContactPhone || room.property?.landlord?.user?.phone || room.landlord?.phone || 'Chưa cập nhật'}
+                    </span>
+                    <span style={{ 
+                      fontSize: '13px', 
+                      fontWeight: 600,
+                      color: copied ? '#059669' : 'var(--text-medium-gray)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: copied ? '#D1FAE5' : '#F1F5F9',
+                      padding: '4px 8px',
+                      borderRadius: '4px'
+                    }}>
+                      {copied ? '✓ Đã chép' : '📋 Sao chép'}
+                    </span>
+                  </div>
+                </div>
                 <Button variant="ghost" style={{ width: '100%' }}>
                   🏠 Xem tất cả phòng của chủ này
                 </Button>

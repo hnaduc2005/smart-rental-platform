@@ -21,7 +21,7 @@ function formatPrice(value: number) {
 }
 
 export function BookingModal({ isOpen, onClose, roomId, roomTitle, roomPrice }: BookingModalProps) {
-  const [requestType, setRequestType] = useState('visit');
+  const [requestType, setRequestType] = useState('deposit');
   const [message, setMessage] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +39,7 @@ export function BookingModal({ isOpen, onClose, roomId, roomTitle, roomPrice }: 
     } else {
       setPhone('');
       setMessage('');
-      setRequestType('visit');
+      setRequestType('deposit');
     }
   }, [isOpen]);
 
@@ -86,18 +86,7 @@ export function BookingModal({ isOpen, onClose, roomId, roomTitle, roomPrice }: 
             <p className={styles.roomPrice}>{formatPrice(roomPrice)}</p>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Loại yêu cầu</label>
-            <select 
-              className={styles.select}
-              value={requestType}
-              onChange={(e) => setRequestType(e.target.value)}
-            >
-              <option value="visit">Hẹn xem phòng</option>
-              <option value="deposit">Giữ chỗ / Đặt cọc</option>
-              <option value="contact">Nhờ tư vấn thêm</option>
-            </select>
-          </div>
+
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Số điện thoại của bạn</label>
