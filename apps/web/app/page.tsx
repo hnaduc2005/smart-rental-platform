@@ -81,9 +81,11 @@ export default function HomePage() {
                   title={room.name}
                   price={room.price}
                   area={room.area}
-                  address={[room.address, room.region?.name].filter(Boolean).join(', ') || 'Chưa cập nhật địa chỉ'}
+                  address={room.address || room.property?.address || room.property?.name || 'Chưa cập nhật'}
+                  roomType={room.roomType?.name}
+                  maxOccupants={room.maxOccupants}
                   imageUrl={room.images?.[0]?.url || room.images?.[0]}
-                  isHot={room.price > 3000000} // Ví dụ logic hiển thị thẻ HOT
+                  isHot={room.price > 3000000}
                   onClick={() => router.push(`/rooms/${room.id}`)}
                 />
               ))

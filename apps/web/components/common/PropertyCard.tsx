@@ -9,6 +9,8 @@ interface PropertyCardProps {
   address: string;
   imageUrl?: string;
   isHot?: boolean;
+  roomType?: string;
+  maxOccupants?: number;
   onClick?: () => void;
 }
 
@@ -28,6 +30,8 @@ export function PropertyCard({
   address,
   imageUrl,
   isHot = false,
+  roomType,
+  maxOccupants,
   onClick,
 }: PropertyCardProps) {
   const [isWishlisted, setIsWishlisted] = React.useState(false);
@@ -76,18 +80,17 @@ export function PropertyCard({
   return (
     <div className={styles.card} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.imageContainer}>
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className={styles.image}
-          />
-        ) : (
-          <div
-            className={styles.image}
-            style={{ background: 'linear-gradient(135deg, #E6ECF6 0%, #C5D5F0 100%)' }}
-          />
-        )}
+        <div
+          className={styles.image}
+          style={{
+            backgroundImage: imageUrl 
+              ? `url('${imageUrl}'), linear-gradient(135deg, #E6ECF6 0%, #C5D5F0 100%)`
+              : `linear-gradient(135deg, #E6ECF6 0%, #C5D5F0 100%)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+          title={title}
+        />
         {isHot && <span className={styles.hotBadge}>HOT</span>}
         <button 
           className={`${styles.wishlistBtn} ${isWishlisted ? styles.active : ''}`}
@@ -99,12 +102,19 @@ export function PropertyCard({
       </div>
 
       <div className={styles.content}>
-        <p className={styles.title}>{title}</p>
-        <p className={styles.price}>{formatPrice(price)}</p>
-        <p className={styles.meta}>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.address}>🏢 Khu: {address}</p>
+        
+        <div className={styles.tagContainer}>
+          <span className={styles.tag}>{roomType || "Phòng trọ"}</span>
+        </div>
+
+        <div className={styles.meta}>
           <span>📐 {area} m²</span>
-        </p>
-        <p className={styles.address}>📍 {address}</p>
+          {maxOccupants && <span>👥 Tối đa: {maxOccupants} người</span>}
+        </div>
+        
+        <p className={styles.price}>{formatPrice(price)}</p>
       </div>
     </div>
   );

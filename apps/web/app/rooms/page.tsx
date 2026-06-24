@@ -92,22 +92,51 @@ function RoomsContent() {
       });
     }
 
+    // Helper to extract short name for address matching.
+    // For named places: remove "Thành phố/Tỉnh" prefix. 
+    // For numbered districts: keep "Quận X" / "Huyện X" (just lowercase + no diacritics).
+    const shortName = (name: string) => {
+      const norm = removeDiacritics(name);
+      // If after stripping prefix what remains is just a number, keep full norm
+      const stripped = norm.replace(/^(thanh pho|tinh)\s+/i, '');
+      return stripped;
+    };
+
     // Province (Region): room's region is a province OR room's region is a district whose parent is the province
+    // Fallback to property's region, then address text matching for rooms with no regionId
     if (filters.province) {
+      const selectedProvince = provinces.find((p) => p.id === filters.province);
+      const provinceShort = selectedProvince ? shortName(selectedProvince.name) : '';
       list = list.filter((r) => {
-        if (!r.regionId) return false;
-        // Direct match (room region IS the province)
+        // Match by regionId
         if (r.regionId === filters.province) return true;
-        // Indirect match (room region is a district under the province)
         if (r.region?.parentId === filters.province) return true;
-        // Also check property region as fallback
         if (r.property?.regionId === filters.province) return true;
+        if (r.property?.region?.parentId === filters.province) return true;
+        // Fallback: match by address text (for rooms with no regionId saved)
+        if (provinceShort) {
+          const addr = removeDiacritics(r.address || r.property?.address || '');
+          if (addr.includes(provinceShort)) return true;
+        }
         return false;
       });
     }
 
     // District
-    if (filters.district) list = list.filter((r) => r.regionId === filters.district || r.property?.regionId === filters.district);
+    if (filters.district) {
+      const selectedDistrict = districts.find((d) => d.id === filters.district);
+      const districtShort = selectedDistrict ? shortName(selectedDistrict.name) : '';
+      list = list.filter((r) => {
+        if (r.regionId === filters.district) return true;
+        if (r.property?.regionId === filters.district) return true;
+        // Fallback: match by address text
+        if (districtShort) {
+          const addr = removeDiacritics(r.address || r.property?.address || '');
+          if (addr.includes(districtShort)) return true;
+        }
+        return false;
+      });
+    }
 
     // Price
     list = list.filter((r) => Number(r.price) >= filters.minPrice && Number(r.price) <= filters.maxPrice);
@@ -126,7 +155,7 @@ function RoomsContent() {
     if (sort === 'area-desc') list.sort((a, b) => Number(b.area) - Number(a.area));
 
     return list;
-  }, [searchQuery, filters, sort, rooms]);
+  }, [searchQuery, filters, sort, rooms, provinces, districts]);
 
   // Build active filter tags
   const activeTags: { label: string; onRemove: () => void }[] = [];
@@ -230,7 +259,9 @@ function RoomsContent() {
                   title={room.name}
                   price={Number(room.price)}
                   area={Number(room.area)}
-                  address={[room.address, room.region?.name].filter(Boolean).join(', ') || 'Chưa cập nhật địa chỉ'}
+                  address={room.address || room.property?.address || room.property?.name || 'Chưa cập nhật'}
+                  roomType={room.roomType?.name}
+                  maxOccupants={room.maxOccupants}
                   imageUrl={room.images?.[0]?.url || room.images?.[0] || ''}
                   onClick={() => router.push(`/rooms/${room.id}`)}
                 />
