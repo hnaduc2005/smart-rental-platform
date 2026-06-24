@@ -11,6 +11,7 @@ export default function LandlordSettingsPage() {
   const [bankAccountName, setBankAccountName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -24,6 +25,12 @@ export default function LandlordSettingsPage() {
         setBankName(profile.bankName || "");
         setBankAccountNumber(profile.bankAccountNumber || "");
         setBankAccountName(profile.bankAccountName || "");
+        
+        if (profile.bankName && profile.bankAccountNumber) {
+          setIsEditing(false);
+        } else {
+          setIsEditing(true);
+        }
       }
     } catch (error: any) {
       toast.error("Lỗi tải thông tin: " + error.message);
@@ -47,6 +54,7 @@ export default function LandlordSettingsPage() {
         token
       });
       toast.success("Cập nhật thông tin thanh toán thành công!");
+      setIsEditing(false);
     } catch (error: any) {
       toast.error("Lỗi cập nhật: " + error.message);
     } finally {
@@ -68,41 +76,71 @@ export default function LandlordSettingsPage() {
           Vui lòng cung cấp chính xác thông tin tài khoản ngân hàng của bạn. Thông tin này sẽ được hiển thị cho khách thuê khi họ thanh toán hóa đơn.
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Ngân hàng thụ hưởng</label>
-            <Input 
-              placeholder="VD: Vietcombank, Techcombank, MB Bank..." 
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
-              required
-            />
+        {!isEditing ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <p style={{ fontSize: 14, color: 'var(--text-medium-gray)', marginBottom: 4 }}>Ngân hàng thụ hưởng</p>
+              <p style={{ fontSize: 18, fontWeight: 'bold', color: 'var(--text-charcoal)' }}>{bankName}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, color: 'var(--text-medium-gray)', marginBottom: 4 }}>Số tài khoản</p>
+              <p style={{ fontSize: 18, fontWeight: 'bold', color: 'var(--text-charcoal)' }}>{bankAccountNumber}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, color: 'var(--text-medium-gray)', marginBottom: 4 }}>Tên chủ tài khoản</p>
+              <p style={{ fontSize: 18, fontWeight: 'bold', color: 'var(--text-charcoal)' }}>{bankAccountName}</p>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <Button onClick={() => setIsEditing(true)} variant="secondary">
+                Thay đổi thông tin
+              </Button>
+            </div>
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Số tài khoản</label>
-            <Input 
-              placeholder="VD: 0123456789" 
-              value={bankAccountNumber}
-              onChange={(e) => setBankAccountNumber(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Tên chủ tài khoản</label>
-            <Input 
-              placeholder="VD: NGUYEN VAN A" 
-              value={bankAccountName}
-              onChange={(e) => setBankAccountName(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div style={{ marginTop: 16 }}>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Đang lưu..." : "Lưu thông tin ngân hàng"}
-            </Button>
-          </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Ngân hàng thụ hưởng</label>
+              <Input 
+                placeholder="VD: Vietcombank, Techcombank, MB Bank..." 
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Số tài khoản</label>
+              <Input 
+                placeholder="VD: 0123456789" 
+                value={bankAccountNumber}
+                onChange={(e) => setBankAccountNumber(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500 }}>Tên chủ tài khoản</label>
+              <Input 
+                placeholder="VD: NGUYEN VAN A" 
+                value={bankAccountName}
+                onChange={(e) => setBankAccountName(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Đang lưu..." : "Lưu thông tin ngân hàng"}
+              </Button>
+              {(bankName || bankAccountNumber) && (
+                <Button type="button" variant="ghost" onClick={() => {
+                  setIsEditing(false);
+                  fetchProfile(); // Reset to saved data on cancel
+                }}>
+                  Hủy
+                </Button>
+              )}
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

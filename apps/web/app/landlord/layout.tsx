@@ -19,42 +19,48 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
   const [pendingRequests, setPendingRequests] = useState(0);
 
   useEffect(() => {
-    // Basic auth check on mount
-    const token = getStoredAccessToken();
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    getCurrentUser(token as string)
-      ?.then((data) => {
-        if (!data || data.role !== "LANDLORD") {
-          router.push("/login");
-        } else {
-          setUser(data);
-          // Lấy số lượng yêu cầu thuê đang chờ xử lý và chưa đọc
-          apiRequest<any[]>("/rental-requests/my", { token: token as string })
-            .then((requests) => {
-              const lastSeenStr = localStorage.getItem("lastSeenRentalRequestsAt");
-              const lastSeenTime = lastSeenStr ? new Date(lastSeenStr).getTime() : 0;
-              
-              const unreadPending = requests.filter((r) => {
-                if (r.status !== "PENDING") return false;
-                const createdAtTime = new Date(r.createdAt).getTime();
-                return createdAtTime > lastSeenTime;
-              }).length;
-              
-              setPendingRequests(unreadPending);
-            })
-            .catch((err) => console.error("Failed to load rental requests count:", err));
-        }
-      })
-      .catch(() => {
+    const fetchUserData = () => {
+      const token = getStoredAccessToken();
+      if (!token) {
         router.push("/login");
-      })
-      ?.finally(() => {
-        setIsLoading(false);
-      });
+        return;
+      }
+
+      getCurrentUser(token as string)
+        ?.then((data) => {
+          if (!data || data.role !== "LANDLORD") {
+            router.push("/login");
+          } else {
+            setUser(data);
+            // Lấy số lượng yêu cầu thuê đang chờ xử lý và chưa đọc
+            apiRequest<any[]>("/rental-requests/my", { token: token as string })
+              .then((requests) => {
+                const lastSeenStr = localStorage.getItem("lastSeenRentalRequestsAt");
+                const lastSeenTime = lastSeenStr ? new Date(lastSeenStr).getTime() : 0;
+                
+                const unreadPending = requests.filter((r) => {
+                  if (r.status !== "PENDING") return false;
+                  const createdAtTime = new Date(r.createdAt).getTime();
+                  return createdAtTime > lastSeenTime;
+                }).length;
+                
+                setPendingRequests(unreadPending);
+              })
+              .catch((err) => console.error("Failed to load rental requests count:", err));
+          }
+        })
+        .catch(() => {
+          router.push("/login");
+        })
+        ?.finally(() => {
+          setIsLoading(false);
+        });
+    };
+
+    fetchUserData();
+
+    window.addEventListener('profileUpdated', fetchUserData);
+    return () => window.removeEventListener('profileUpdated', fetchUserData);
   }, [router]);
 
   // Check token existence on route changes and clear badge if visiting rental-requests
@@ -128,6 +134,29 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
             );
           })}
         </nav>
+        
+        {/* Footer Area with User Info and Logout */}
+        <div className={styles.sidebarFooter}>
+          <div className={styles.sidebarUserBlock}>
+            <div className={styles.sidebarAvatar}>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              ) : (
+                user?.fullName ? user.fullName.charAt(0).toUpperCase() : "L"
+              )}
+            </div>
+            <div className={styles.sidebarUserInfo}>
+              <p className={styles.sidebarUserName}>{user?.fullName || user?.email}</p>
+              <span className={styles.sidebarRoleBadge}>
+                {user?.role === "LANDLORD" ? "Chủ trọ" : user?.role}
+              </span>
+            </div>
+          </div>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <span>🚪</span>
+            Đăng xuất
+          </button>
+        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -138,31 +167,6 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
             <h1 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>
               Kênh Quản Lý Chủ Trọ
             </h1>
-          </div>
-          <div className={styles.userInfo} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div className={styles.avatar}>
-              {user?.fullName ? user.fullName.charAt(0).toUpperCase() : "L"}
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div className={styles.userName}>{user?.fullName || user?.email}</div>
-              <span className={styles.roleBadge}>
-                {user?.role === "LANDLORD" ? "Chủ trọ" : user?.role}
-              </span>
-            </div>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "transparent",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                cursor: "pointer",
-                fontSize: "12px",
-                color: "#666"
-              }}
-            >
-              Đăng xuất
-            </button>
           </div>
         </header>
 

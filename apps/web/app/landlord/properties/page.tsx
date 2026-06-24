@@ -45,6 +45,7 @@ export default function LandlordPropertiesPage() {
   const [description, setDescription] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [regionId, setRegionId] = useState<string | null>(null);
 
   const handleOpenCreateModal = () => {
     setEditingProperty(null);
@@ -53,16 +54,18 @@ export default function LandlordPropertiesPage() {
     setDescription("");
     setLatitude("");
     setLongitude("");
+    setRegionId(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (property: Property) => {
+  const handleOpenEditModal = (property: any) => {
     setEditingProperty(property);
     setName(property.name);
     setAddress(property.address);
     setDescription(property.description);
     setLatitude(property.latitude?.toString() || "");
     setLongitude(property.longitude?.toString() || "");
+    setRegionId(property.regionId || null);
     setIsModalOpen(true);
   };
 
@@ -83,6 +86,7 @@ export default function LandlordPropertiesPage() {
         description,
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
+        regionId
       };
 
       if (editingProperty) {
@@ -208,6 +212,8 @@ export default function LandlordPropertiesPage() {
                     longitude={longitude}
                     onLatitudeChange={setLatitude}
                     onLongitudeChange={setLongitude}
+                    regionId={regionId}
+                    onRegionIdChange={setRegionId}
                   />
                   {/* Hidden input to ensure required validation passes if address is filled */}
                   <input type="hidden" value={address} required />
