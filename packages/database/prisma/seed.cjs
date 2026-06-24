@@ -68,8 +68,14 @@ async function upsertRoomAmenities(roomId, amenityIds) {
 }
 
 async function main() {
+  // Xoá các loại phòng cũ không còn dùng
+  await prisma.roomType.deleteMany({
+    where: { slug: { in: ["single-room", "studio"] } }
+  });
+
   const admin = await upsertUser({
     id: "seed-user-admin",
+
     email: "admin@smart-rental.local",
     fullName: "System Admin",
     phone: "0900000001",
@@ -217,23 +223,33 @@ async function main() {
 
   const roomTypes = await Promise.all([
     prisma.roomType.upsert({
-      where: { slug: "single-room" },
-      update: { name: "Phong don", description: "Phong don co ban cho mot nguoi." },
+      where: { slug: "nha-tro" },
+      update: { name: "Nhà trọ / Phòng trọ", description: "Phòng trọ hoặc nhà trọ, phù hợp sinh viên và người đi làm." },
       create: {
-        id: "seed-room-type-single",
-        name: "Phong don",
-        slug: "single-room",
-        description: "Phong don co ban cho mot nguoi."
+        id: "seed-room-type-nha-tro",
+        name: "Nhà trọ / Phòng trọ",
+        slug: "nha-tro",
+        description: "Phòng trọ hoặc nhà trọ, phù hợp sinh viên và người đi làm."
       }
     }),
     prisma.roomType.upsert({
-      where: { slug: "studio" },
-      update: { name: "Studio", description: "Phong studio khep kin." },
+      where: { slug: "nha-nguyen-can" },
+      update: { name: "Nhà nguyên căn", description: "Nhà nguyên căn cho thuê nguyên bộ, phù hợp gia đình." },
       create: {
-        id: "seed-room-type-studio",
-        name: "Studio",
-        slug: "studio",
-        description: "Phong studio khep kin."
+        id: "seed-room-type-nha-nguyen-can",
+        name: "Nhà nguyên căn",
+        slug: "nha-nguyen-can",
+        description: "Nhà nguyên căn cho thuê nguyên bộ, phù hợp gia đình."
+      }
+    }),
+    prisma.roomType.upsert({
+      where: { slug: "can-ho" },
+      update: { name: "Căn hộ", description: "Căn hộ chung cư, studio hoặc mini apartment." },
+      create: {
+        id: "seed-room-type-can-ho",
+        name: "Căn hộ",
+        slug: "can-ho",
+        description: "Căn hộ chung cư, studio hoặc mini apartment."
       }
     })
   ]);
@@ -361,10 +377,10 @@ async function main() {
       where: { id: "seed-room-a101" },
       update: {
         propertyId: propertyA.id,
-        roomTypeId: roomTypes[0].id,
+        roomTypeId: roomTypes[0].id, // Nhà trọ / Phòng trọ
         regionId: binhThanh.id,
-        name: "Phong A101",
-        description: "Phong don day du noi that co ban.",
+        name: "Phòng A101",
+        description: "Phòng trọ đầy đủ nội thất cơ bản, an ninh tốt.",
         price: "3500000",
         area: "22",
         address: propertyA.address,
@@ -379,10 +395,10 @@ async function main() {
       create: {
         id: "seed-room-a101",
         propertyId: propertyA.id,
-        roomTypeId: roomTypes[0].id,
+        roomTypeId: roomTypes[0].id, // Nhà trọ / Phòng trọ
         regionId: binhThanh.id,
-        name: "Phong A101",
-        description: "Phong don day du noi that co ban.",
+        name: "Phòng A101",
+        description: "Phòng trọ đầy đủ nội thất cơ bản, an ninh tốt.",
         price: "3500000",
         area: "22",
         address: propertyA.address,
@@ -399,10 +415,10 @@ async function main() {
       where: { id: "seed-room-a102" },
       update: {
         propertyId: propertyA.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[2].id, // Căn hộ
         regionId: binhThanh.id,
-        name: "Studio A102",
-        description: "Studio co bep nho va ban cong.",
+        name: "Căn hộ A102",
+        description: "Căn hộ mini có bếp nhỏ và ban công, view đẹp.",
         price: "4800000",
         area: "28",
         address: propertyA.address,
@@ -414,10 +430,10 @@ async function main() {
       create: {
         id: "seed-room-a102",
         propertyId: propertyA.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[2].id, // Căn hộ
         regionId: binhThanh.id,
-        name: "Studio A102",
-        description: "Studio co bep nho va ban cong.",
+        name: "Căn hộ A102",
+        description: "Căn hộ mini có bếp nhỏ và ban công, view đẹp.",
         price: "4800000",
         area: "28",
         address: propertyA.address,
@@ -431,10 +447,10 @@ async function main() {
       where: { id: "seed-room-b201" },
       update: {
         propertyId: propertyB.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[2].id, // Căn hộ
         regionId: district7.id,
-        name: "Studio B201",
-        description: "Phong studio gan Lotte Mart Quan 7.",
+        name: "Căn hộ B201",
+        description: "Căn hộ gần Lotte Mart Quận 7, đầy đủ nội thất.",
         price: "5200000",
         area: "30",
         address: propertyB.address,
@@ -446,10 +462,10 @@ async function main() {
       create: {
         id: "seed-room-b201",
         propertyId: propertyB.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[2].id, // Căn hộ
         regionId: district7.id,
-        name: "Studio B201",
-        description: "Phong studio gan Lotte Mart Quan 7.",
+        name: "Căn hộ B201",
+        description: "Căn hộ gần Lotte Mart Quận 7, đầy đủ nội thất.",
         price: "5200000",
         area: "30",
         address: propertyB.address,
@@ -478,10 +494,10 @@ async function main() {
       create: {
         id: "seed-room-b202",
         propertyId: propertyB.id,
-        roomTypeId: roomTypes[0].id,
+        roomTypeId: roomTypes[0].id, // Nhà trọ / Phòng trọ
         regionId: district7.id,
-        name: "Phong B202",
-        description: "Phong don tiet kiem chi phi.",
+        name: "Phòng B202",
+        description: "Phòng trọ tiết kiệm chi phí, phù hợp sinh viên.",
         price: "3000000",
         area: "18",
         address: propertyB.address,
@@ -495,14 +511,14 @@ async function main() {
       where: { id: "seed-room-c301" },
       update: {
         propertyId: propertyC.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[1].id, // Nhà nguyên căn
         regionId: binhThanh.id,
-        name: "Studio C301",
-        description: "Studio moi, anh sang tu nhien.",
+        name: "Nhà nguyên căn C301",
+        description: "Nhà nguyên căn mới, ánh sáng tự nhiên, phù hợp gia đình.",
         price: "5600000",
         area: "32",
         address: propertyC.address,
-        maxOccupants: 2,
+        maxOccupants: 4,
         status: "MAINTENANCE",
         publicContactName: approvedLandlord.publicDisplayName,
         publicContactPhone: approvedLandlord.publicPhone
@@ -510,14 +526,14 @@ async function main() {
       create: {
         id: "seed-room-c301",
         propertyId: propertyC.id,
-        roomTypeId: roomTypes[1].id,
+        roomTypeId: roomTypes[1].id, // Nhà nguyên căn
         regionId: binhThanh.id,
-        name: "Studio C301",
-        description: "Studio moi, anh sang tu nhien.",
+        name: "Nhà nguyên căn C301",
+        description: "Nhà nguyên căn mới, ánh sáng tự nhiên, phù hợp gia đình.",
         price: "5600000",
         area: "32",
         address: propertyC.address,
-        maxOccupants: 2,
+        maxOccupants: 4,
         status: "MAINTENANCE",
         publicContactName: approvedLandlord.publicDisplayName,
         publicContactPhone: approvedLandlord.publicPhone
