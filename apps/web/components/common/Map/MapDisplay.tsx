@@ -30,13 +30,20 @@ export default function MapDisplay({ latitude, longitude, address, height = "300
   const lng = Number(longitude);
 
   return (
-    <div style={{ height, width: "100%", border: "1px solid #ddd", borderRadius: "8px", overflow: "hidden", position: "relative", zIndex: 0 }}>
-      <MapWithPin 
-        latitude={lat} 
-        longitude={lng} 
-        onChange={() => {}} 
-        readOnly={true}
-      />
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div style={{ height, width: "100%", border: "1px solid #ddd", borderRadius: "8px", overflow: "hidden", position: "relative", zIndex: 0 }}>
+        <MapWithPin 
+          latitude={lat} 
+          longitude={lng} 
+          onChange={() => {}} 
+          readOnly={true}
+        />
+      </div>
+      {address && (
+        <div style={{ color: "var(--color-primary, #16a34a)", fontSize: "14.5px", fontWeight: 500, padding: "2px 4px" }}>
+          Địa chỉ chi tiết: {address}
+        </div>
+      )}
     </div>
   );
 }

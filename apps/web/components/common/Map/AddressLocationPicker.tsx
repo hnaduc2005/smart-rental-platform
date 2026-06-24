@@ -90,30 +90,41 @@ export default function AddressLocationPicker({
     setIsSearching(true);
     setShowMap(true);
     
-    // Construct search query for Nominatim
-    // Sometimes omitting street number helps if it's too specific, but we'll try full first
-    const fullQuery = `${street}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`;
-    const fallbackQuery = `${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`;
+    // Create multiple levels of queries from specific to general
+    const queries = [
+      `${street}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      `${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      `${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      `${selectedProvince.name}, Việt Nam`
+    ];
 
     try {
-      let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}&limit=1&countrycodes=vn`, {
-        headers: { "Accept-Language": "vi-VN,vi;q=0.9", "User-Agent": "SmartRentalPlatform/1.0" }
-      });
-      let data = await response.json();
+      let foundData = null;
+      let queryLevel = 0;
 
-      if (!data || data.length === 0) {
-        // Fallback to Ward/District level
-        response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}&limit=1&countrycodes=vn`, {
+      for (let i = 0; i < queries.length; i++) {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queries[i])}&limit=1&countrycodes=vn`, {
           headers: { "Accept-Language": "vi-VN,vi;q=0.9", "User-Agent": "SmartRentalPlatform/1.0" }
         });
-        data = await response.json();
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          foundData = data[0];
+          queryLevel = i;
+          break;
+        }
       }
 
-      if (data && data.length > 0) {
-        onLatitudeChange(data[0].lat);
-        onLongitudeChange(data[0].lon);
+      if (foundData) {
+        onLatitudeChange(foundData.lat);
+        onLongitudeChange(foundData.lon);
+        
+        if (queryLevel > 0) {
+           // Nếu không tìm thấy chính xác số nhà/phường, thông báo để người dùng biết
+           alert("Không tìm thấy vị trí chính xác tuyệt đối. Bản đồ đã được đưa về khu vực gần nhất. Vui lòng kéo thả ghim đỏ vào đúng nhà của bạn!");
+        }
       } else {
-        alert("Bản đồ không thể định vị tự động khu vực này. Vui lòng kéo màn hình bản đồ và thả ghim đỏ vào đúng vị trí.");
+        alert("Bản đồ không thể định vị tự động khu vực này. Vui lòng tự di chuyển bản đồ và thả ghim đỏ vào đúng vị trí.");
       }
     } catch (error) {
       console.error("Lỗi định vị:", error);
