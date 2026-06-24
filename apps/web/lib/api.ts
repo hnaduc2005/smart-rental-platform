@@ -14,7 +14,11 @@ type ApiRequestOptions = Omit<RequestInit, "body"> & {
   token?: string | null;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+// Chạy trên browser -> dùng relative URL (/api) để Next.js proxy
+// Chạy trên server (SSR) -> dùng absolute URL để gọi thẳng backend qua IPv4 (127.0.0.1)
+const API_BASE_URL = typeof window !== "undefined" 
+  ? "/api" 
+  : (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001/api");
 
 export async function apiRequest<TResponse>(path: string, options: ApiRequestOptions = {}) {
   const { body, token, headers: providedHeaders, ...requestOptions } = options;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, InternalServerErrorException } from "@nestjs/common";
 import { RentalRequestStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateRentalRequestStatusDto } from "./dto/update-rental-request-status.dto";
@@ -43,24 +43,28 @@ export class RentalRequestsService {
       throw new NotFoundException("Landlord profile not found");
     }
 
-    return this.prisma.rentalRequest.findMany({
-      where: {
-        room: {
-          property: {
-            landlordId: landlord.id,
+    try {
+      return await this.prisma.rentalRequest.findMany({
+        where: {
+          room: {
+            property: {
+              landlordId: landlord.id,
+            },
           },
         },
-      },
-      include: {
-        seeker: {
-          select: { id: true, fullName: true, email: true, phone: true }
+        include: {
+          seeker: {
+            select: { id: true, fullName: true, email: true, phone: true }
+          },
+          room: {
+            select: { id: true, name: true, property: { select: { id: true, name: true } } }
+          }
         },
-        room: {
-          select: { id: true, name: true, property: { select: { id: true, name: true } } }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message || "Prisma Error in getForLandlord");
+    }
   }
 
   async updateStatus(landlordUserId: string, requestId: string, dto: UpdateRentalRequestStatusDto) {
