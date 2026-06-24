@@ -190,33 +190,33 @@ async function main() {
   });
 
   const hcm = await prisma.region.upsert({
-    where: { slug: "ho-chi-minh" },
-    update: { name: "Ho Chi Minh", parentId: null },
+    where: { slug: "thanh-pho-ho-chi-minh" },
+    update: { name: "Thành phố Hồ Chí Minh", parentId: null },
     create: {
-      id: "seed-region-hcm",
-      name: "Ho Chi Minh",
-      slug: "ho-chi-minh"
+      id: "region-thanh-pho-ho-chi-minh",
+      name: "Thành phố Hồ Chí Minh",
+      slug: "thanh-pho-ho-chi-minh"
     }
   });
 
   const binhThanh = await prisma.region.upsert({
-    where: { slug: "binh-thanh" },
-    update: { name: "Binh Thanh", parentId: hcm.id },
+    where: { slug: "thanh-pho-ho-chi-minh-quan-binh-thanh" },
+    update: { name: "Quận Bình Thạnh", parentId: hcm.id },
     create: {
-      id: "seed-region-binh-thanh",
-      name: "Binh Thanh",
-      slug: "binh-thanh",
+      id: "region-thanh-pho-ho-chi-minh-quan-binh-thanh",
+      name: "Quận Bình Thạnh",
+      slug: "thanh-pho-ho-chi-minh-quan-binh-thanh",
       parentId: hcm.id
     }
   });
 
   const district7 = await prisma.region.upsert({
-    where: { slug: "quan-7" },
-    update: { name: "Quan 7", parentId: hcm.id },
+    where: { slug: "thanh-pho-ho-chi-minh-quan-7" },
+    update: { name: "Quận 7", parentId: hcm.id },
     create: {
-      id: "seed-region-quan-7",
-      name: "Quan 7",
-      slug: "quan-7",
+      id: "region-thanh-pho-ho-chi-minh-quan-7",
+      name: "Quận 7",
+      slug: "thanh-pho-ho-chi-minh-quan-7",
       parentId: hcm.id
     }
   });

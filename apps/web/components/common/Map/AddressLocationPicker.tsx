@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button, Input } from "@/components/common";
+import { apiRequest } from "@/lib";
 
 const MapWithPin = dynamic(() => import("./MapWithPin"), {
   ssr: false,
@@ -16,6 +17,8 @@ interface AddressLocationPickerProps {
   longitude: number | string;
   onLatitudeChange: (val: string) => void;
   onLongitudeChange: (val: string) => void;
+  regionId?: string | null;
+  onRegionIdChange?: (val: string | null) => void;
 }
 
 export default function AddressLocationPicker({ 
@@ -24,26 +27,35 @@ export default function AddressLocationPicker({
   latitude, 
   longitude, 
   onLatitudeChange, 
-  onLongitudeChange 
+  onLongitudeChange,
+  regionId,
+  onRegionIdChange
 }: AddressLocationPickerProps) {
   
   const [provinces, setProvinces] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
-  const [wards, setWards] = useState<any[]>([]);
 
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
-  const [selectedWard, setSelectedWard] = useState<any>(null);
   const [street, setStreet] = useState("");
 
   const [isSearching, setIsSearching] = useState(false);
   const [showMap, setShowMap] = useState(!!latitude && !!longitude);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Fetch provinces on mount
+  // Parse existing address to populate street if possible (simplistic)
   useEffect(() => {
-    fetch("https://provinces.open-api.vn/api/p/")
-      .then(res => res.json())
+    if (address && !street && !selectedProvince) {
+      const parts = address.split(',').map(s => s.trim());
+      if (parts.length > 0) {
+        setStreet(parts[0]);
+      }
+    }
+  }, [address]);
+
+  // Fetch provinces from OUR backend
+  useEffect(() => {
+    apiRequest<any[]>("/regions/provinces")
       .then(data => setProvinces(data))
       .catch(err => console.error("Error fetching provinces:", err));
   }, []);
@@ -51,38 +63,27 @@ export default function AddressLocationPicker({
   // Fetch districts when province changes
   useEffect(() => {
     if (selectedProvince) {
-      fetch(`https://provinces.open-api.vn/api/p/${selectedProvince.code}?depth=2`)
-        .then(res => res.json())
-        .then(data => setDistricts(data.districts || []))
+      apiRequest<any[]>(`/regions/provinces/${selectedProvince.id}/districts`)
+        .then(data => setDistricts(data))
         .catch(err => console.error("Error fetching districts:", err));
     } else {
       setDistricts([]);
-      setWards([]);
     }
   }, [selectedProvince]);
 
-  // Fetch wards when district changes
+  // Update address string and regionId when components change
   useEffect(() => {
-    if (selectedDistrict) {
-      fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict.code}?depth=2`)
-        .then(res => res.json())
-        .then(data => setWards(data.wards || []))
-        .catch(err => console.error("Error fetching wards:", err));
-    } else {
-      setWards([]);
-    }
-  }, [selectedDistrict]);
-
-  // Update address string when components change
-  useEffect(() => {
-    if (selectedProvince && selectedDistrict && selectedWard && street) {
-      const newAddress = `${street}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}`;
+    if (selectedProvince && selectedDistrict && street) {
+      const newAddress = `${street}, ${selectedDistrict.name}, ${selectedProvince.name}`;
       onAddressChange(newAddress);
+      if (onRegionIdChange) {
+        onRegionIdChange(selectedDistrict.id || selectedProvince.id);
+      }
     }
-  }, [selectedProvince, selectedDistrict, selectedWard, street, onAddressChange]);
+  }, [selectedProvince, selectedDistrict, street, onAddressChange, onRegionIdChange]);
 
   const handleSearchMap = async () => {
-    if (!selectedProvince || !selectedDistrict || !selectedWard || !street) {
+    if (!selectedProvince || !selectedDistrict || !street) {
       alert("Vui lòng chọn đầy đủ thông tin địa chỉ trước khi tìm trên bản đồ.");
       return;
     }
@@ -92,8 +93,7 @@ export default function AddressLocationPicker({
     
     // Create multiple levels of queries from specific to general
     const queries = [
-      `${street}, ${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
-      `${selectedWard.name}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      `${street}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
       `${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
       `${selectedProvince.name}, Việt Nam`
     ];
@@ -158,64 +158,49 @@ export default function AddressLocationPicker({
         
         <select 
           style={{ ...selectStyle, width: '100%' }}
-          value={selectedProvince?.code || ""}
+          value={selectedProvince?.id || ""}
           onChange={(e) => {
-            const p = provinces.find(x => x.code == e.target.value);
+            const p = provinces.find(x => x.id === e.target.value);
             setSelectedProvince(p);
             setSelectedDistrict(null);
-            setSelectedWard(null);
           }}
         >
           <option value="">-- Tỉnh / Thành phố --</option>
-          {provinces.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
+          {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
 
         <select 
           style={{ ...selectStyle, width: '100%' }}
-          value={selectedDistrict?.code || ""}
+          value={selectedDistrict?.id || ""}
           disabled={!selectedProvince}
           onChange={(e) => {
-            const d = districts.find(x => x.code == e.target.value);
+            const d = districts.find(x => x.id === e.target.value);
             setSelectedDistrict(d);
-            setSelectedWard(null);
           }}
         >
           <option value="">-- Quận / Huyện --</option>
-          {districts.map(d => <option key={d.code} value={d.code}>{d.name}</option>)}
-        </select>
-
-        <select 
-          style={{ ...selectStyle, width: '100%' }}
-          value={selectedWard?.code || ""}
-          disabled={!selectedDistrict}
-          onChange={(e) => {
-            const w = wards.find(x => x.code == e.target.value);
-            setSelectedWard(w);
-          }}
-        >
-          <option value="">-- Phường / Xã --</option>
-          {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
+          {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
 
         <Input 
-          placeholder="Số nhà, tên đường (VD: 15 Đường 23)" 
+          placeholder="Số nhà, tên đường, phường (VD: 15 Đường 23, P. Bình Trưng Đông)" 
           value={street}
           onChange={(e) => setStreet(e.target.value)}
-          disabled={!selectedWard}
+          disabled={!selectedDistrict}
         />
 
         <Button 
           type="button" 
           onClick={handleSearchMap} 
-          disabled={!selectedWard || !street || isSearching}
+          disabled={!selectedDistrict || !street || isSearching}
           style={{ width: '100%' }}
         >
           {isSearching ? "⏳ Đang định vị..." : "📍 Định vị trên Bản đồ"}
         </Button>
 
-        {(selectedProvince && selectedDistrict && selectedWard && street) && (
+        {(selectedProvince && selectedDistrict && street) && (
           <p style={{ margin: 0, fontSize: '12px', color: '#28a745', fontWeight: 500, lineHeight: 1.5 }}>
-            ✅ {street}, {selectedWard.name}, {selectedDistrict.name}, {selectedProvince.name}
+            ✅ {street}, {selectedDistrict.name}, {selectedProvince.name}
           </p>
         )}
 
