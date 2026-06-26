@@ -16,3 +16,5 @@ docs/TENANT_ROADMAP.md
 docs/PROGRESS.md
 docs/GIT_STATUS_BY_PHASE.md
 SETUP_GUIDE.md
+*.tsbuildinfo
+

@@ -24,6 +24,8 @@ function RoomsContent() {
   const searchParams = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
+  const landlordIdParam = searchParams.get('landlordId');
+
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sort, setSort] = useState('default');
 
@@ -154,8 +156,18 @@ function RoomsContent() {
     if (sort === 'area-asc') list.sort((a, b) => Number(a.area) - Number(b.area));
     if (sort === 'area-desc') list.sort((a, b) => Number(b.area) - Number(a.area));
 
+    // Filter by landlordId
+    if (landlordIdParam) {
+      list = list.filter((r) => 
+        r.property?.landlordId === landlordIdParam || 
+        r.property?.landlord?.id === landlordIdParam || 
+        r.landlord?.id === landlordIdParam || 
+        r.landlordId === landlordIdParam
+      );
+    }
+
     return list;
-  }, [searchQuery, filters, sort, rooms, provinces, districts]);
+  }, [searchQuery, filters, sort, rooms, provinces, districts, landlordIdParam]);
 
   // Build active filter tags
   const activeTags: { label: string; onRemove: () => void }[] = [];
@@ -181,6 +193,16 @@ function RoomsContent() {
     const rt = roomTypes.find((r) => r.id === typeId);
     activeTags.push({ label: rt?.name ?? typeId, onRemove: () => setFilters((f) => ({ ...f, roomTypes: f.roomTypes.filter((x) => x !== typeId) })) });
   });
+  if (landlordIdParam) {
+    activeTags.push({ 
+      label: 'Phòng của cùng chủ', 
+      onRemove: () => {
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.delete('landlordId');
+        router.push(`/rooms?${newParams.toString()}`);
+      } 
+    });
+  }
 
   return (
     <div className={styles.page}>

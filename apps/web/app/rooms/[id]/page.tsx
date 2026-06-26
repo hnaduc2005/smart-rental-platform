@@ -236,9 +236,20 @@ export default function RoomDetailsPage({ params }: PageProps) {
                     </span>
                   </div>
                 </div>
-                <Button variant="ghost" style={{ width: '100%' }}>
-                  🏠 Xem tất cả phòng của chủ này
-                </Button>
+                {(() => {
+                  const landlordId = room.property?.landlordId || room.property?.landlord?.id || room.landlord?.id || room.landlordId;
+                  return landlordId ? (
+                    <Link href={`/rooms?landlordId=${landlordId}`} style={{ display: 'block', width: '100%', textDecoration: 'none' }}>
+                      <Button variant="ghost" style={{ width: '100%' }}>
+                        🏠 Xem tất cả phòng của chủ này
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button variant="ghost" style={{ width: '100%' }}>
+                      🏠 Xem tất cả phòng của chủ này
+                    </Button>
+                  );
+                })()}
               </div>
             </section>
           </div>
