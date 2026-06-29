@@ -131,16 +131,34 @@
 .mainContent {
   flex: 1;
   margin-left: 260px;
-  padding: 32px 40px;
   background-color: var(--bg-page);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.header {
+.topNav {
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  padding: 0 40px;
+  background-color: white;
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.topNavTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-deep-blue);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.pageContent {
+  padding: 32px 40px;
+  flex: 1;
 }
 
 .userInfo {

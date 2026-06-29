@@ -37,13 +37,13 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
               .then((requests) => {
                 const lastSeenStr = localStorage.getItem("lastSeenRentalRequestsAt");
                 const lastSeenTime = lastSeenStr ? new Date(lastSeenStr).getTime() : 0;
-                
+
                 const unreadPending = requests.filter((r) => {
                   if (r.status !== "PENDING") return false;
                   const createdAtTime = new Date(r.createdAt).getTime();
                   return createdAtTime > lastSeenTime;
                 }).length;
-                
+
                 setPendingRequests(unreadPending);
               })
               .catch((err) => console.error("Failed to load rental requests count:", err));
@@ -68,7 +68,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
     if (!isLoading && !getStoredAccessToken()) {
       router.push("/login");
     }
-    
+
     // Nếu người dùng vào trang yêu cầu thuê, cập nhật thời gian đã xem và xóa badge
     if (pathname === "/landlord/rental-requests") {
       localStorage.setItem("lastSeenRentalRequestsAt", new Date().toISOString());
@@ -100,7 +100,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
     { label: "Tiền cọc", href: "/landlord/deposits", icon: "💰" },
     { label: "Hóa đơn", href: "/landlord/invoices", icon: "🧾" },
     { label: "Báo cáo sự cố", href: "/landlord/reports", icon: "⚠️" },
-    { label: "Cài đặt thanh toán", href: "/landlord/settings", icon: "⚙️" },
+    { label: "Cài đặt", href: "/landlord/settings", icon: "⚙️" },
   ];
 
   return (
@@ -134,7 +134,7 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
             );
           })}
         </nav>
-        
+
         {/* Footer Area with User Info and Logout */}
         <div className={styles.sidebarFooter}>
           <div className={styles.sidebarUserBlock}>
@@ -162,15 +162,13 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
       {/* Main Content Area */}
       <div className={styles.mainContent}>
         {/* Top Navbar */}
-        <header className={styles.header}>
+        <header className={styles.topNav}>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>
-              Kênh Quản Lý Chủ Trọ
-            </h1>
+            <h1 className={styles.topNavTitle}>KÊNH QUẢN LÝ CHỦ TRỌ</h1>
           </div>
         </header>
 
-        <main>{children}</main>
+        <main className={styles.pageContent}>{children}</main>
       </div>
     </div>
   );
