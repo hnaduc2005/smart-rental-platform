@@ -38,10 +38,10 @@ export default function RegisterPage() {
       setUser(response.user);
 
       setTimeout(() => {
-        router.push("/login");
+        router.push("/auth/login");
       }, 1000);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "Unable to create account"));
+      setError(getErrorMessage(caughtError, "Không thể tạo tài khoản"));
     } finally {
       setIsSubmitting(false);
     }
@@ -52,12 +52,12 @@ export default function RegisterPage() {
       <section className="auth-panel" aria-labelledby="register-title">
         <div className="auth-panel__header">
           <p>Smart Rental</p>
-          <h1 id="register-title">Create account</h1>
+          <h1 id="register-title">Tạo tài khoản</h1>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
-            <span>Full name</span>
+            <span>Họ và tên</span>
             <input
               autoComplete="name"
               name="fullName"
@@ -81,7 +81,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            <span>Phone</span>
+            <span>Số điện thoại</span>
             <input
               autoComplete="tel"
               inputMode="tel"
@@ -94,7 +94,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            <span>Role</span>
+            <span>Loại tài khoản</span>
             <select
               name="role"
               onChange={(event) => setRole(event.target.value as PublicRole)}
@@ -106,7 +106,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            <span>Password</span>
+            <span>Mật khẩu</span>
             <input
               autoComplete="new-password"
               minLength={8}
@@ -121,17 +121,17 @@ export default function RegisterPage() {
           {error ? <p className="auth-message auth-message--error">{error}</p> : null}
           {user ? (
             <p className="auth-message auth-message--success">
-              Account created for {user.email}. Status: {user.status}
+              Đăng ký thành công! Đang chuyển hướng...
             </p>
           ) : null}
 
           <button disabled={isSubmitting} type="submit">
-            {isSubmitting ? "Creating..." : "Create account"}
+            {isSubmitting ? "Đang tạo..." : "Tạo tài khoản"}
           </button>
         </form>
 
         <p className="auth-switch">
-          Already have an account? <Link href="/login">Sign in</Link>
+          Đã có tài khoản? <Link href="/auth/login">Đăng nhập</Link>
         </p>
       </section>
     </main>

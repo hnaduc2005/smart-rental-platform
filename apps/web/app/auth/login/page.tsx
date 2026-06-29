@@ -63,7 +63,7 @@ export default function LoginPage() {
         redirectByRole(response.user.role);
       }, 1000);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "Unable to sign in"));
+      setError(getErrorMessage(caughtError, "Không thể đăng nhập"));
     } finally {
       setIsSubmitting(false);
     }
@@ -86,7 +86,7 @@ export default function LoginPage() {
       <section className="auth-panel" aria-labelledby="login-title">
         <div className="auth-panel__header">
           <p>Smart Rental</p>
-          <h1 id="login-title">Sign in</h1>
+          <h1 id="login-title">Đăng nhập</h1>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -103,7 +103,7 @@ export default function LoginPage() {
           </label>
 
           <label>
-            <span>Password</span>
+            <span>Mật khẩu</span>
             <input
               autoComplete="current-password"
               name="password"
@@ -117,17 +117,17 @@ export default function LoginPage() {
           {error ? <p className="auth-message auth-message--error">{error}</p> : null}
           {user ? (
             <p className="auth-message auth-message--success">
-              Signed in as {user.email}. Status: {user.status}
+              Đăng nhập thành công! Đang chuyển hướng...
             </p>
           ) : null}
 
           <button disabled={isSubmitting} type="submit">
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
         <p className="auth-switch">
-          Need an account? <Link href="/register">Create account</Link>
+          Chưa có tài khoản? <Link href="/auth/register">Đăng ký ngay</Link>
         </p>
       </section>
     </main>

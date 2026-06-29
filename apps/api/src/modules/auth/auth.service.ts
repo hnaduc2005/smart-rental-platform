@@ -24,20 +24,20 @@ export class AuthService {
     const role = registerDto.role ?? Role.SEEKER;
 
     if (role === Role.ADMIN) {
-      throw new BadRequestException("ADMIN registration is not allowed from the public API");
+      throw new BadRequestException("Không được phép đăng ký tài khoản ADMIN từ giao diện công khai");
     }
 
     const existingUser = await this.usersService.findByEmail(registerDto.email);
 
     if (existingUser) {
-      throw new ConflictException("Email already exists");
+      throw new ConflictException("Email này đã được sử dụng");
     }
 
     if (registerDto.phone) {
       const existingPhone = await this.usersService.findByPhone(registerDto.phone);
 
       if (existingPhone) {
-        throw new ConflictException("Phone already exists");
+        throw new ConflictException("Số điện thoại này đã được sử dụng");
       }
     }
 
@@ -77,7 +77,7 @@ export class AuthService {
       };
     } catch (error) {
       if (this.isUniqueConstraintError(error)) {
-        throw new ConflictException("Email or phone already exists");
+        throw new ConflictException("Email hoặc số điện thoại đã tồn tại");
       }
 
       throw error;
@@ -88,11 +88,11 @@ export class AuthService {
     const user = await this.usersService.validateUserPassword(loginDto.email, loginDto.password);
 
     if (!user) {
-      throw new UnauthorizedException("Invalid credentials");
+      throw new UnauthorizedException("Tài khoản hoặc mật khẩu không chính xác");
     }
 
     if (this.usersService.isAccountBlocked(user)) {
-      throw new ForbiddenException("User account is not allowed to sign in");
+      throw new ForbiddenException("Tài khoản của bạn đã bị khóa hoặc không có quyền đăng nhập");
     }
 
     const accessToken = await this.generateAccessToken(this.usersService.getSafeUser(user));

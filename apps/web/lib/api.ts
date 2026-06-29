@@ -47,8 +47,8 @@ export async function apiRequest<TResponse>(path: string, options: ApiRequestOpt
       document.cookie = "smart-rental.accessToken=; path=/; max-age=0; SameSite=Lax";
       
       // Only redirect if not already on login page
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (window.location.pathname !== "/auth/login") {
+        window.location.href = "/auth/login";
       }
     }
     throw new ApiError(getErrorMessage(data, response.statusText), response.status, data);
