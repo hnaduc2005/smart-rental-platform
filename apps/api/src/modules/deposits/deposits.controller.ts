@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Patch, Post, Body, UseGuards } from "@nestjs/common";
 import { Role } from "@smart-rental/database";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
@@ -7,11 +7,21 @@ import { RolesGuard } from "../../common/guards/roles.guard";
 import { AuthenticatedUser } from "../../common/types/authenticated-user";
 import { DepositsService } from "./deposits.service";
 import { UpdateDepositStatusDto } from "./dto/update-deposit-status.dto";
+import { CreateDepositDto } from "./dto/create-deposit.dto";
 
 @Controller("deposits")
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DepositsController {
   constructor(private readonly depositsService: DepositsService) {}
+
+  @Post()
+  @Roles(Role.SEEKER, Role.TENANT)
+  createDeposit(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateDepositDto
+  ) {
+    return this.depositsService.createDeposit(user.id, dto);
+  }
 
   @Get("my")
   @Roles(Role.LANDLORD)
