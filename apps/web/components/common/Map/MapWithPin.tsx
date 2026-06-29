@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -18,6 +18,16 @@ interface MapWithPinProps {
   longitude: number;
   onChange: (lat: number, lng: number) => void;
   readOnly?: boolean;
+}
+
+function MapUpdater({ position }: { position: L.LatLngExpression }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, map.getZoom(), { animate: true, duration: 1.5 });
+    }
+  }, [position, map]);
+  return null;
 }
 
 function LocationMarker({ position, setPosition, readOnly }: any) {
@@ -77,6 +87,7 @@ export default function MapWithPin({ latitude, longitude, onChange, readOnly = f
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <MapUpdater position={position} />
         <LocationMarker position={position} setPosition={handlePositionChange} readOnly={readOnly} />
       </MapContainer>
     </div>

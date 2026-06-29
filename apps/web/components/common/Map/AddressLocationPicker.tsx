@@ -41,7 +41,6 @@ export default function AddressLocationPicker({
 
   const [isSearching, setIsSearching] = useState(false);
   const [showMap, setShowMap] = useState(!!latitude && !!longitude);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Parse existing address to populate street if possible (simplistic)
   useEffect(() => {
@@ -91,10 +90,26 @@ export default function AddressLocationPicker({
     setIsSearching(true);
     setShowMap(true);
     
+    // Hàm làm sạch chuỗi (Bỏ các từ khóa dễ làm rối Nominatim và lấy phần chính)
+    const cleanText = (text: string) => {
+      if (!text) return "";
+      return text.replace(/(Thành phố|Tỉnh|Quận|Huyện|Thị xã|Phường|Xã)\s+/gi, "").trim();
+    };
+
+    // Nếu người dùng nhập cả chuỗi dài vào ô số nhà, cố gắng lấy phần đầu tiên (thường là số nhà + tên đường)
+    const shortStreet = street.split(',')[0].trim();
+
     // Create multiple levels of queries from specific to general
     const queries = [
+      // 1. Dạng đầy đủ nhất người dùng nhập
       `${street}, ${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      // 2. Dạng đã được làm sạch từ khóa hành chính
+      `${shortStreet}, ${cleanText(selectedDistrict.name)}, ${cleanText(selectedProvince.name)}, Việt Nam`,
+      // 3. Chỉ lấy đường + Quận + Tỉnh (bỏ qua phường/xã nếu có trong street)
+      `${shortStreet}, ${selectedDistrict.name}, ${selectedProvince.name}`,
+      // 4. Chỉ tìm Quận / Huyện
       `${selectedDistrict.name}, ${selectedProvince.name}, Việt Nam`,
+      // 5. Chỉ tìm Tỉnh / Thành phố
       `${selectedProvince.name}, Việt Nam`
     ];
 
@@ -202,30 +217,6 @@ export default function AddressLocationPicker({
           <p style={{ margin: 0, fontSize: '12px', color: '#28a745', fontWeight: 500, lineHeight: 1.5 }}>
             ✅ {street}, {selectedDistrict.name}, {selectedProvince.name}
           </p>
-        )}
-
-        {showMap && (
-          <div>
-            <button 
-              type="button"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '12px', padding: 0 }}
-            >
-              {showAdvanced ? "▼ Ẩn tọa độ" : "▶ Tọa độ (nâng cao)"}
-            </button>
-            {showAdvanced && (
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '2px', fontSize: '11px', color: '#666' }}>Vĩ độ</label>
-                  <Input value={latitude} readOnly style={{ background: '#f5f5f5', fontSize: '12px' }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '2px', fontSize: '11px', color: '#666' }}>Kinh độ</label>
-                  <Input value={longitude} readOnly style={{ background: '#f5f5f5', fontSize: '12px' }} />
-                </div>
-              </div>
-            )}
-          </div>
         )}
       </div>
 
