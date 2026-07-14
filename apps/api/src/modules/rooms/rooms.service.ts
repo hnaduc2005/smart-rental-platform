@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+﻿import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { Prisma, RoomStatus, PropertyStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
+import { publicUserSelect } from "../../common/selects/safe-user.select";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 
@@ -25,7 +26,7 @@ export class RoomsService {
           property: {
             include: {
               landlord: {
-                include: { user: true }
+                include: { user: { select: publicUserSelect } }
               },
               region: true
             }
@@ -73,7 +74,7 @@ export class RoomsService {
         property: {
           include: {
             landlord: {
-              include: { user: true }
+              include: { user: { select: publicUserSelect } }
             }
           }
         },
@@ -220,3 +221,4 @@ export class RoomsService {
     });
   }
 }
+

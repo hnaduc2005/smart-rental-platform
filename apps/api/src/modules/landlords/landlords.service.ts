@@ -1,6 +1,7 @@
-import { Injectable } from "@nestjs/common";
+﻿import { Injectable } from "@nestjs/common";
 import { AdminAuditAction, UserStatus, VerificationStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
+import { safeUserSelect } from "../../common/selects/safe-user.select";
 
 @Injectable()
 export class LandlordsService {
@@ -9,7 +10,7 @@ export class LandlordsService {
   findPending() {
     return this.prisma.landlordProfile.findMany({
       where: { verificationStatus: VerificationStatus.PENDING },
-      include: { user: true },
+      include: { user: { select: safeUserSelect } },
       orderBy: { createdAt: "asc" }
     });
   }
@@ -36,7 +37,7 @@ export class LandlordsService {
     return this.prisma.landlordProfile.findUnique({
       where: { id },
       include: {
-        user: true,
+        user: { select: safeUserSelect },
         properties: true,
         subscriptions: {
           include: { servicePackage: true }
@@ -75,7 +76,7 @@ export class LandlordsService {
 
       return tx.landlordProfile.findUnique({
         where: { id },
-        include: { user: true }
+        include: { user: { select: safeUserSelect } }
       });
     });
   }
@@ -113,8 +114,9 @@ export class LandlordsService {
 
       return tx.landlordProfile.findUnique({
         where: { id },
-        include: { user: true }
+        include: { user: { select: safeUserSelect } }
       });
     });
   }
 }
+

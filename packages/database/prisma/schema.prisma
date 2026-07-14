@@ -130,6 +130,16 @@ enum AdminAuditAction {
   CREATE_SERVICE_PACKAGE
   UPDATE_SERVICE_PACKAGE
   DISABLE_SERVICE_PACKAGE
+  UPDATE_ROOM_STATUS
+  CREATE_ROOM_TYPE
+  UPDATE_ROOM_TYPE
+  DISABLE_ROOM_TYPE
+  CREATE_AMENITY
+  UPDATE_AMENITY
+  DISABLE_AMENITY
+  CREATE_REGION
+  UPDATE_REGION
+  DISABLE_REGION
 }
 
 model User {
@@ -172,11 +182,11 @@ model LandlordProfile {
   verificationNote   String?
   verifiedAt         DateTime?
   rejectedReason     String?
-  
+
   // Bank Information for rent payments
-  bankName           String?
-  bankAccountNumber  String?
-  bankAccountName    String?
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
 
   user          User                   @relation(fields: [userId], references: [id], onDelete: Restrict)
   properties    Property[]
@@ -287,6 +297,7 @@ model Amenity {
   name        String        @unique
   slug        String        @unique
   description String?
+  isActive    Boolean       @default(true)
   rooms       RoomAmenity[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -306,6 +317,7 @@ model RoomType {
   name        String   @unique
   slug        String   @unique
   description String?
+  isActive    Boolean  @default(true)
   rooms       Room[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -315,6 +327,7 @@ model Region {
   id         String     @id @default(cuid())
   name       String
   slug       String     @unique
+  isActive   Boolean    @default(true)
   parentId   String?
   parent     Region?    @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children   Region[]   @relation("RegionHierarchy")

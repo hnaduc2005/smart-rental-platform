@@ -27,12 +27,13 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const role = registerDto.role ?? Role.SEEKER;
+    const email = registerDto.email.toLowerCase();
 
     if (role === Role.ADMIN) {
       throw new BadRequestException("Không được phép đăng ký tài khoản ADMIN từ giao diện công khai");
     }
 
-    const existingUser = await this.usersService.findByEmail(registerDto.email);
+    const existingUser = await this.usersService.findByEmail(email);
 
     if (existingUser) {
       throw new ConflictException("Email này đã được sử dụng");
@@ -51,7 +52,7 @@ export class AuthService {
 
     try {
       const user = await this.usersService.createUser({
-        email: registerDto.email,
+        email,
         passwordHash,
         fullName: registerDto.fullName,
         phone: registerDto.phone,
@@ -63,7 +64,7 @@ export class AuthService {
                 create: {
                   publicDisplayName: registerDto.fullName,
                   publicPhone: registerDto.phone,
-                  publicEmail: registerDto.email,
+                  publicEmail: email,
                   verificationStatus: VerificationStatus.PENDING
                 }
               }
