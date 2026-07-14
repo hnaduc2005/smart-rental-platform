@@ -17,6 +17,17 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 import * as crypto from "crypto";
 import { MailerService } from "@nestjs-modules/mailer";
 
+const PASSWORD_RESET_SUCCESS_MESSAGE =
+  "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn khôi phục mật khẩu.";
+
+function getAppUrl() {
+  return (process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
+
+function hasMailerCredentials() {
+  return Boolean(process.env.MAIL_USER && process.env.MAIL_PASS);
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -138,23 +149,28 @@ export class AuthService {
     const user = await this.usersService.findByEmail(forgotPasswordDto.email);
     if (!user) {
       // Return success even if user not found to prevent email enumeration
-      return { message: "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn khôi phục mật khẩu." };
+      return { message: PASSWORD_RESET_SUCCESS_MESSAGE };
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 30); // 30 minutes validity
+    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
 
     await this.usersService.updateResetToken(user.id, resetToken, expiresAt);
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+    const resetUrl = `${getAppUrl()}/auth/reset-password?token=${resetToken}`;
+
+    if (!hasMailerCredentials()) {
+      console.warn("Password reset email skipped because MAIL_USER or MAIL_PASS is not configured.");
+      return { message: PASSWORD_RESET_SUCCESS_MESSAGE };
+    }
 
     try {
       await this.mailerService.sendMail({
         to: user.email,
         subject: "Smart Rental - Khôi phục mật khẩu",
         html: `
-          <h3>Xin chào ${user.fullName || 'bạn'},</h3>
+          <h3>Xin chào ${user.fullName || "bạn"},</h3>
           <p>Bạn đã yêu cầu khôi phục mật khẩu cho tài khoản trên Smart Rental.</p>
           <p>Vui lòng click vào đường link bên dưới để đặt lại mật khẩu mới:</p>
           <p><a href="${resetUrl}" style="padding: 10px 15px; background-color: #0056b3; color: white; text-decoration: none; border-radius: 5px;">Đặt lại mật khẩu</a></p>
@@ -164,14 +180,10 @@ export class AuthService {
         `
       });
     } catch (e) {
-      console.error("Gửi email thất bại: ", e);
+      console.error("Gửi email thất bại:", e);
     }
-    
-    // For development/testing purposes, returning the token (REMOVE IN PRODUCTION)
-    return { 
-      message: "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn khôi phục mật khẩu.",
-      devToken: resetToken 
-    };
+
+    return { message: PASSWORD_RESET_SUCCESS_MESSAGE };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

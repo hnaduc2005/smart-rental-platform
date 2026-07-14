@@ -116,7 +116,7 @@ export function changePassword(payload: { currentPassword: string; newPassword: 
 }
 
 export function forgotPassword(payload: { email: string }) {
-  return apiRequest<{ message: string; devToken?: string }>("/auth/forgot-password", {
+  return apiRequest<{ message: string }>("/auth/forgot-password", {
     method: "POST",
     body: payload
   });
@@ -128,4 +128,3 @@ export function resetPassword(payload: { token: string; newPassword: string }) {
     body: payload
   });
 }
-
