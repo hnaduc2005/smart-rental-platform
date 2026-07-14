@@ -51,7 +51,7 @@ export async function apiRequest<TResponse>(path: string, options: ApiRequestOpt
         window.location.href = "/auth/login";
       }
     }
-    throw new ApiError(getErrorMessage(data, response.statusText), response.status, data);
+    throw new ApiError(getErrorMessage(data, response.statusText, response.status), response.status, data);
   }
 
   return data as TResponse;
@@ -71,7 +71,7 @@ async function parseResponseBody(response: Response) {
   return response.text();
 }
 
-function getErrorMessage(data: unknown, fallback: string) {
+function getErrorMessage(data: unknown, fallback: string, status?: number) {
   if (data && typeof data === "object" && "message" in data) {
     const message = (data as { message?: unknown }).message;
 
@@ -84,5 +84,17 @@ function getErrorMessage(data: unknown, fallback: string) {
     }
   }
 
-  return fallback || "Request failed";
+  if (typeof data === "string") {
+    const text = data.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+    if (text) {
+      return text.length > 180 ? `${text.slice(0, 180)}...` : text;
+    }
+  }
+
+  if (fallback) {
+    return fallback;
+  }
+
+  return status ? `Yêu cầu thất bại (${status})` : "Yêu cầu thất bại";
 }
