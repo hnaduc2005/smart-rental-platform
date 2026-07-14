@@ -14,7 +14,7 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname.startsWith(p + "?"));
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Let public paths through
@@ -43,7 +43,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // We can't validate JWT in middleware without the secret accessible here,
+  // We can't validate JWT in proxy without the secret accessible here,
   // so we do a lightweight check: just ensure token exists.
   // Full role validation happens in each layout's useEffect (client-side).
   return NextResponse.next();

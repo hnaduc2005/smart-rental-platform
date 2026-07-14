@@ -49,7 +49,7 @@ export function storeAccessToken(token: string) {
   }
 
   window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  // Also store in cookie so Next.js middleware can read it
+  // Also store in cookie so Next.js proxy can read it
   document.cookie = `${TOKEN_STORAGE_KEY}=${token}; path=/; max-age=86400; SameSite=Lax`;
 }
 
