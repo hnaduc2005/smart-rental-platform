@@ -137,6 +137,8 @@ model User {
   email        String     @unique
   phone        String?    @unique
   passwordHash String?
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
   fullName     String?
   avatarUrl    String?
   role         Role       @default(SEEKER)

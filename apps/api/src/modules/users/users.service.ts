@@ -40,6 +40,17 @@ export class UsersService {
     });
   }
 
+  findByResetToken(token: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+          gt: new Date()
+        }
+      }
+    });
+  }
+
   createUser(data: Prisma.UserCreateInput) {
     return this.prisma.user.create({
       data,
@@ -96,6 +107,28 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: { passwordHash: hashedPassword }
+    });
+  }
+
+  updateResetToken(id: string, token: string | null, expiresAt: Date | null) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        resetPasswordToken: token,
+        resetPasswordExpires: expiresAt
+      }
+    });
+  }
+
+  async updatePassword(id: string, newPw: string) {
+    const hashedPassword = await bcrypt.hash(newPw, 10);
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        passwordHash: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      }
     });
   }
 

@@ -28,8 +28,27 @@ import { UploadsModule } from "./modules/uploads/uploads.module";
 import { UsersModule } from "./modules/users/users.module";
 import { ViewingAppointmentsModule } from "./modules/viewing-appointments/viewing-appointments.module";
 
+import { MailerModule } from "@nestjs-modules/mailer";
+
 @Module({
   imports: [
+    MailerModule.forRootAsync({
+      useFactory: () => ({
+        transport: {
+          host: process.env.MAIL_HOST || "smtp.gmail.com",
+          port: Number(process.env.MAIL_PORT) || 587,
+          secure: false,
+          auth: {
+            user: process.env.MAIL_USER || "",
+            pass: process.env.MAIL_PASS || ""
+          },
+          tls: { rejectUnauthorized: false }
+        },
+        defaults: {
+          from: `"Smart Rental" <${process.env.MAIL_USER || "no-reply@smartrental.com"}>`
+        }
+      })
+    }),
     PrismaModule,
     AdminModule,
     AmenitiesModule,
