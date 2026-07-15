@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HeroSection } from '@/components/layout';
-import { PropertyCard, Badge } from '@/components/common';
+import { PropertyCard } from '@/components/common';
 import { apiRequest } from '@/lib/api';
 import styles from '@/app/page.module.css';
 
@@ -106,17 +106,17 @@ export default function HomePage() {
             <div className={styles.banner} style={{ background: 'linear-gradient(135deg, #0045A8, #00B7FF)' }}>
               <h3 className={styles.bannerTitle}>🏠 Đăng tin cho thuê</h3>
               <p className={styles.bannerDesc}>Tiếp cận hàng ngàn người thuê tiềm năng mỗi ngày</p>
-              <Badge variant="info">Dành cho Chủ trọ</Badge>
+              <span className={styles.bannerBadge}>Dành cho Chủ trọ</span>
             </div>
             <div className={styles.banner} style={{ background: 'linear-gradient(135deg, #00A84A, #00C95C)' }}>
               <h3 className={styles.bannerTitle}>✓ Phòng đã xác minh</h3>
               <p className={styles.bannerDesc}>100% phòng trọ được kiểm duyệt bởi đội ngũ SmartRental</p>
-              <Badge variant="success">An toàn & Uy tín</Badge>
+              <span className={styles.bannerBadge}>An toàn & Uy tín</span>
             </div>
             <div className={styles.banner} style={{ background: 'linear-gradient(135deg, #CC4600, #FF5C00)' }}>
               <h3 className={styles.bannerTitle}>⚡ Tìm phòng nhanh</h3>
               <p className={styles.bannerDesc}>Lọc theo giá, diện tích, khu vực chỉ trong vài giây</p>
-              <Badge variant="warning">Miễn phí 100%</Badge>
+              <span className={styles.bannerBadge}>Miễn phí 100%</span>
             </div>
           </div>
         </div>

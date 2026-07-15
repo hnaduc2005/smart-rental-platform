@@ -69,6 +69,9 @@ a:hover {
   display: grid;
   place-items: center;
   background: #f6f8fb;
+  min-height: calc(100vh - 64px);
+  padding: 40px 16px;
+  align-content: center;
 }
 
 .auth-panel {
