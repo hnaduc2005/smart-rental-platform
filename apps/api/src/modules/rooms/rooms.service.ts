@@ -1,7 +1,8 @@
 ﻿import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { Prisma, RoomStatus, PropertyStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
-import { publicUserSelect } from "../../common/selects/safe-user.select";
+import { publicLandlordSelect } from "../../common/selects/safe-user.select";
+import { publicRoomWhere } from "../../common/filters/public-listing.filters";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 
@@ -26,7 +27,7 @@ export class RoomsService {
           property: {
             include: {
               landlord: {
-                include: { user: { select: publicUserSelect } }
+                select: publicLandlordSelect
               },
               region: true
             }
@@ -47,6 +48,44 @@ export class RoomsService {
       ...args,
       ...(defaultInclude ? { include: defaultInclude } : {})
     });
+  }
+
+  findPublic() {
+    return this.findMany({
+      where: publicRoomWhere
+    });
+  }
+
+  async findPublicById(id: string) {
+    const room = await this.prisma.room.findFirst({
+      where: {
+        id,
+        ...publicRoomWhere
+      },
+      include: {
+        property: {
+          include: {
+            landlord: {
+              select: publicLandlordSelect
+            }
+          }
+        },
+        region: true,
+        roomType: true,
+        images: {
+          orderBy: { sortOrder: "asc" }
+        },
+        amenities: {
+          include: { amenity: true }
+        }
+      }
+    });
+
+    if (!room) {
+      throw new NotFoundException("Room not found");
+    }
+
+    return room;
   }
 
   async findMyRooms(userId: string) {
@@ -74,7 +113,7 @@ export class RoomsService {
         property: {
           include: {
             landlord: {
-              include: { user: { select: publicUserSelect } }
+              select: publicLandlordSelect
             }
           }
         },
@@ -221,4 +260,3 @@ export class RoomsService {
     });
   }
 }
-

@@ -2,6 +2,7 @@ import { Global, Module } from "@nestjs/common";
 import { JwtModule, type JwtSignOptions } from "@nestjs/jwt";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../../common/guards/roles.guard";
+import { VerifiedLandlordGuard } from "../../common/guards/verified-landlord.guard";
 import { UsersModule } from "../users/users.module";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
@@ -30,7 +31,7 @@ function getJwtExpiresIn(): JwtSignOptions["expiresIn"] {
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, RolesGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, JwtModule, UsersModule]
+  providers: [AuthService, JwtAuthGuard, RolesGuard, VerifiedLandlordGuard],
+  exports: [AuthService, JwtAuthGuard, RolesGuard, VerifiedLandlordGuard, JwtModule, UsersModule]
 })
 export class AuthModule {}

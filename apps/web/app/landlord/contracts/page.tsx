@@ -67,7 +67,7 @@ export default function LandlordContractsPage() {
       const [contractsData, roomsData, tenantsData] = await Promise.all([
         apiRequest<Contract[]>("/contracts/my", { token }),
         apiRequest<any[]>("/rooms/my", { token }), // fetch rooms to select
-        apiRequest<any[]>("/tenants", { token }) // fetch tenants to select
+        apiRequest<any[]>("/tenants/my", { token }) // fetch scoped tenants to select
       ]);
       setContracts(contractsData);
       setRooms(roomsData);

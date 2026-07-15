@@ -6,6 +6,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
+    "test": "nest build && node --test test/verified-landlord.guard.test.cjs test/public-access.test.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

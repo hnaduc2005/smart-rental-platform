@@ -187,9 +187,9 @@ export default function RoomDetailsPage({ params }: PageProps) {
           <div className={styles.sidebarColumn}>
             <section className={styles.section}>
               <div className={styles.landlordProfile}>
-                <div className={styles.avatar}>{room.property?.landlord?.user?.fullName?.charAt(0) || room.landlord?.name?.charAt(0) || 'L'}</div>
+                <div className={styles.avatar}>{room.property?.landlord?.publicDisplayName?.charAt(0) || room.property?.landlord?.user?.fullName?.charAt(0) || room.landlord?.name?.charAt(0) || 'L'}</div>
                 <div>
-                  <p className={styles.landlordName}>{room.property?.landlord?.user?.fullName || room.landlord?.name || 'Chủ nhà'}</p>
+                  <p className={styles.landlordName}>{room.property?.landlord?.publicDisplayName || room.property?.landlord?.businessName || room.property?.landlord?.user?.fullName || room.landlord?.name || 'Chủ nhà'}</p>
                   <p className={styles.landlordMeta}>Đang quản lý tài sản này</p>
                 </div>
               </div>
@@ -213,13 +213,13 @@ export default function RoomDetailsPage({ params }: PageProps) {
                       transition: 'all 0.2s ease',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                     }}
-                    onClick={() => handleCopyPhone(room.publicContactPhone || room.property?.landlord?.user?.phone || room.landlord?.phone || 'Chưa cập nhật')}
+                    onClick={() => handleCopyPhone(room.publicContactPhone || room.property?.landlord?.publicPhone || room.landlord?.phone || 'Chưa cập nhật')}
                     title="Nhấn để sao chép"
                     onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-deep-blue)'}
                     onMouseLeave={(e) => e.currentTarget.style.borderColor = '#CBD5E1'}
                   >
                     <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--color-deep-blue)', letterSpacing: '0.5px' }}>
-                      {room.publicContactPhone || room.property?.landlord?.user?.phone || room.landlord?.phone || 'Chưa cập nhật'}
+                      {room.publicContactPhone || room.property?.landlord?.publicPhone || room.landlord?.phone || 'Chưa cập nhật'}
                     </span>
                     <span style={{ 
                       fontSize: '13px', 

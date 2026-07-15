@@ -4,6 +4,7 @@ import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../../common/guards/roles.guard";
+import { VerifiedLandlordGuard } from "../../common/guards/verified-landlord.guard";
 import { AuthenticatedUser } from "../../common/types/authenticated-user";
 import { RoomsService } from "./rooms.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
@@ -15,9 +16,7 @@ export class RoomsController {
 
   @Get()
   findAll() {
-    return this.roomsService.findMany({
-      where: { status: "AVAILABLE" }
-    });
+    return this.roomsService.findPublic();
   }
 
   @Get("my")
@@ -29,18 +28,18 @@ export class RoomsController {
 
   @Get(":id")
   findOne(@Param("id") id: string) {
-    return this.roomsService.findById(id);
+    return this.roomsService.findPublicById(id);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, VerifiedLandlordGuard)
   @Roles(Role.LANDLORD)
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRoomDto) {
     return this.roomsService.createForLandlord(user.id, dto);
   }
 
   @Put(":id")
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, VerifiedLandlordGuard)
   @Roles(Role.LANDLORD)
   update(
     @Param("id") id: string,
@@ -51,7 +50,7 @@ export class RoomsController {
   }
 
   @Delete(":id")
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, VerifiedLandlordGuard)
   @Roles(Role.LANDLORD)
   remove(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.roomsService.deleteForLandlord(id, user.id);

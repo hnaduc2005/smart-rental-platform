@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { RentalRequestStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -28,12 +29,34 @@ export class TenantsService {
 
     return this.prisma.tenantProfile.findMany({
       where: {
-        contracts: {
-          some: { landlordId: landlord.id }
-        }
+        OR: [
+          {
+            contracts: {
+              some: { landlordId: landlord.id }
+            }
+          },
+          {
+            user: {
+              is: {
+                rentalRequests: {
+                  some: {
+                    status: RentalRequestStatus.APPROVED,
+                    room: {
+                      is: {
+                        property: {
+                          is: { landlordId: landlord.id }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       include: {
-        user: { select: { fullName: true, phone: true } },
+        user: { select: { fullName: true, phone: true, email: true } },
         contracts: {
           where: { landlordId: landlord.id },
           include: { room: { include: { property: true } } },

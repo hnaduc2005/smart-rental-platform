@@ -1,7 +1,8 @@
 ﻿import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { Prisma, PropertyStatus, RoomStatus } from "@smart-rental/database";
 import { PrismaService } from "../prisma/prisma.service";
-import { publicUserSelect } from "../../common/selects/safe-user.select";
+import { publicLandlordSelect } from "../../common/selects/safe-user.select";
+import { publicPropertyWhere } from "../../common/filters/public-listing.filters";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { UpdatePropertyDto } from "./dto/update-property.dto";
 
@@ -24,7 +25,7 @@ export class PropertiesService {
       ? undefined
       : args.include ?? {
           landlord: {
-            include: { user: { select: publicUserSelect } }
+            select: publicLandlordSelect
           },
           region: true,
           rooms: true
@@ -34,6 +35,49 @@ export class PropertiesService {
       ...args,
       ...(defaultInclude ? { include: defaultInclude } : {})
     });
+  }
+
+  findPublic() {
+    return this.prisma.property.findMany({
+      where: publicPropertyWhere,
+      include: {
+        landlord: {
+          select: publicLandlordSelect
+        },
+        region: true,
+        rooms: {
+          where: { status: RoomStatus.AVAILABLE }
+        }
+      }
+    });
+  }
+
+  async findPublicById(id: string) {
+    const property = await this.prisma.property.findFirst({
+      where: {
+        id,
+        ...publicPropertyWhere
+      },
+      include: {
+        landlord: {
+          select: publicLandlordSelect
+        },
+        region: true,
+        rooms: {
+          where: { status: RoomStatus.AVAILABLE },
+          include: {
+            roomType: true,
+            images: true
+          }
+        }
+      }
+    });
+
+    if (!property) {
+      throw new NotFoundException("Property not found");
+    }
+
+    return property;
   }
 
   async findMyProperties(userId: string) {
@@ -57,7 +101,7 @@ export class PropertiesService {
       where: { id },
       include: {
         landlord: {
-          include: { user: { select: publicUserSelect } }
+          select: publicLandlordSelect
         },
         region: true,
         rooms: {
@@ -135,4 +179,3 @@ export class PropertiesService {
     });
   }
 }
-
