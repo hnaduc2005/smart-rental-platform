@@ -220,6 +220,7 @@
 .admin-content {
   flex: 1;
   padding: 28px;
+  min-height: 0;
 }
 
 .admin-page-header {
