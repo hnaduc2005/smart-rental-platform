@@ -491,7 +491,6 @@ export default function LandlordDashboardPage() {
               { href: "/landlord/invoices", icon: "🧾", label: "Tạo hóa đơn" },
               { href: "/landlord/contracts", icon: "📄", label: "Xem hợp đồng" },
               { href: "/landlord/tenants", icon: "👥", label: "Danh sách khách" },
-              { href: "/landlord/deposits", icon: "💰", label: "Quản lý cọc" },
               { href: "/landlord/reports", icon: "⚠️", label: "Báo cáo sự cố" },
             ].map((action) => (
               <Link key={action.href} href={action.href} className={styles.quickActionBtn}>

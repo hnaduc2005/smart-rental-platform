@@ -97,7 +97,6 @@ export default function LandlordLayout({ children }: LandlordLayoutProps) {
     { label: "Yêu cầu thuê", href: "/landlord/rental-requests", icon: "📩" },
     { label: "Hợp đồng", href: "/landlord/contracts", icon: "📄" },
     { label: "Khách thuê", href: "/landlord/tenants", icon: "👥" },
-    { label: "Tiền cọc", href: "/landlord/deposits", icon: "💰" },
     { label: "Hóa đơn", href: "/landlord/invoices", icon: "🧾" },
     { label: "Báo cáo sự cố", href: "/landlord/reports", icon: "⚠️" },
     { label: "Cài đặt", href: "/landlord/settings", icon: "⚙️" },

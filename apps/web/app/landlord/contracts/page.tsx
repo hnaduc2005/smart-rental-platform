@@ -53,7 +53,6 @@ export default function LandlordContractsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [rentAmount, setRentAmount] = useState("");
-  const [depositAmount, setDepositAmount] = useState("");
   const [paymentDueDay, setPaymentDueDay] = useState("5");
   const [notes, setNotes] = useState("");
 
@@ -101,7 +100,7 @@ export default function LandlordContractsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomId || !tenantProfileId || !startDate || !rentAmount || !depositAmount || !paymentDueDay) {
+    if (!roomId || !tenantProfileId || !startDate || !rentAmount || !paymentDueDay) {
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc.");
       return;
     }
@@ -117,7 +116,7 @@ export default function LandlordContractsPage() {
           startDate: new Date(startDate).toISOString(),
           endDate: endDate ? new Date(endDate).toISOString() : undefined,
           rentAmount: Number(rentAmount),
-          depositAmount: Number(depositAmount),
+          depositAmount: 0,
           paymentDueDay: Number(paymentDueDay),
           notes
         },
@@ -144,7 +143,6 @@ export default function LandlordContractsPage() {
     setStartDate("");
     setEndDate("");
     setRentAmount(firstRoom.price ? firstRoom.price.toString() : "");
-    setDepositAmount(firstRoom.price ? firstRoom.price.toString() : "");
     setPaymentDueDay("5");
     setNotes("");
     setIsModalOpen(true);
@@ -156,7 +154,6 @@ export default function LandlordContractsPage() {
     const room = rooms.find(r => r.id === selectedRoomId);
     if (room && room.price) {
       setRentAmount(room.price.toString());
-      setDepositAmount(room.price.toString());
     }
   };
 
@@ -254,12 +251,6 @@ export default function LandlordContractsPage() {
                 <span className={styles.detailLabel}>Giá thuê:</span>
                 <span className={`${styles.detailValue} ${styles.highlightValue}`}>
                   {formatCurrency(contract.rentAmount)}/tháng
-                </span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Tiền cọc:</span>
-                <span className={styles.detailValue}>
-                  {formatCurrency(contract.depositAmount)}
                 </span>
               </div>
             </div>
@@ -362,15 +353,6 @@ export default function LandlordContractsPage() {
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label className={styles.label}>Tiền cọc *</label>
-                    <Input 
-                      type="number" 
-                      value={depositAmount} 
-                      onChange={(e) => setDepositAmount(e.target.value)} 
-                      required 
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
                     <label className={styles.label}>Ngày đóng tiền hàng tháng *</label>
                     <Input 
                       type="number" 
@@ -423,10 +405,6 @@ export default function LandlordContractsPage() {
                   <tr style={{ borderBottom: "1px solid #eee" }}>
                     <td style={{ padding: "8px 0" }}>Giá thuê</td>
                     <td style={{ padding: "8px 0", textAlign: "right", fontWeight: "bold" }}>{formatCurrency(selectedContract.rentAmount)}/tháng</td>
-                  </tr>
-                  <tr style={{ borderBottom: "1px solid #eee" }}>
-                    <td style={{ padding: "8px 0" }}>Tiền cọc</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(selectedContract.depositAmount)}</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid #eee" }}>
                     <td style={{ padding: "8px 0" }}>Ngày bắt đầu</td>

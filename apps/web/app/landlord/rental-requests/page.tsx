@@ -50,7 +50,7 @@ export default function LandlordRentalRequestsPage() {
 
   const handleStatusChange = async (id: string, newStatus: RentalRequest["status"]) => {
     if (newStatus === "APPROVED") {
-      if (!confirm("Sau khi duyệt, người thuê có thể tiến hành đặt cọc và làm hợp đồng. Bạn có chắc chắn muốn duyệt?")) return;
+      if (!confirm("Sau khi duyệt, người thuê có thể tiến hành làm hợp đồng. Bạn có chắc chắn muốn duyệt?")) return;
     }
 
     try {
