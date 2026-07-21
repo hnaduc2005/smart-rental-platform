@@ -1,556 +1,564 @@
-# Nền Tảng Quản Lý Phòng Trọ Thông Minh
+# 🏠 Smart Rental Platform — Nền Tảng Quản Lý Phòng Trọ Thông Minh
 
-Đây là skeleton ban đầu cho hệ thống quản lý phòng trọ thông minh dành cho
-quản trị viên, chủ trọ, người tìm trọ và người thuê trọ.
+> **Đồ án môn học | Nhóm 7**  
+> Hệ thống Web App toàn diện, số hóa và tự động hóa toàn bộ quy trình cho thuê phòng trọ — từ tìm kiếm phòng, quản lý hợp đồng, tính hóa đơn điện/nước đến theo dõi thanh toán.
 
-Dự án được tổ chức theo kiến trúc monorepo để dễ mở rộng frontend, backend,
-database schema và các package dùng chung trong quá trình phát triển lâu dài.
+---
 
-## Trạng Thái Hiện Tại
+## 📋 Mục Lục
 
-Repository hiện chỉ là bộ khung khởi tạo.
+- [Giới thiệu](#-giới-thiệu)
+- [Tính năng nổi bật](#-tính-năng-nổi-bật)
+- [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
+- [Kiến trúc hệ thống](#-kiến-trúc-hệ-thống)
+- [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
+- [Yêu cầu môi trường](#-yêu-cầu-môi-trường)
+- [Hướng dẫn cài đặt & chạy](#-hướng-dẫn-cài-đặt--chạy)
+- [Biến môi trường](#-biến-môi-trường)
+- [Database & Prisma](#-database--prisma)
+- [Các lệnh thường dùng](#-các-lệnh-thường-dùng)
+- [Vai trò người dùng](#-vai-trò-người-dùng)
+- [Luồng nghiệp vụ chính](#-luồng-nghiệp-vụ-chính)
+- [Nhóm phát triển](#-nhóm-phát-triển)
 
-- Chưa có giao diện hoàn chỉnh.
-- Chưa có business logic backend.
-- Chưa có API endpoint xử lý nghiệp vụ thật.
-- Chưa có dữ liệu mẫu hoặc seed data.
-- Chưa có migration đã chạy lên database.
-- Prisma schema mới ở mức thiết kế dữ liệu ban đầu.
+---
 
-Mục tiêu của giai đoạn này là tạo nền tảng cấu trúc rõ ràng, nhất quán và đủ
-sẵn sàng để cài dependencies, kết nối Neon PostgreSQL, phát triển tính năng và
-chạy migration sau này.
+## 🎯 Giới Thiệu
 
-## Công Nghệ Sử Dụng
+**Smart Rental Platform** là một nền tảng quản lý phòng trọ thông minh dành cho thị trường cho thuê nhà trọ, ký túc xá và căn hộ dịch vụ tại Việt Nam.
 
-- Frontend: Next.js App Router
-- Backend: NestJS
-- ORM: Prisma
-- Database: PostgreSQL
-- Database hosting: Neon
-- Monorepo: pnpm workspace
-- Ngôn ngữ chính: TypeScript
+### Vấn đề đặt ra
 
-## Vai Trò Trong Hệ Thống
+| Đối tượng | Khó khăn |
+|-----------|----------|
+| **Chủ trọ** | Quản lý thủ công (sổ sách, Excel), dễ sai sót; mất thời gian tính hóa đơn điện/nước hàng tháng |
+| **Người thuê** | Khó tìm phòng uy tín phù hợp; thiếu minh bạch trong các khoản phí |
+| **Thị trường** | Thiếu nền tảng chuyên biệt kết nối và số hóa quy trình cho thuê |
 
-Hệ thống được thiết kế cho các nhóm người dùng chính:
+### Giải pháp
 
-- Admin: quản trị hệ thống, duyệt tài khoản chủ trọ, quản lý danh mục và báo cáo.
-- Chủ trọ / Landlord: quản lý nhà trọ, phòng trọ, người thuê, hợp đồng, hóa đơn và thanh toán.
-- Người tìm trọ / Seeker: tìm kiếm phòng, xem chi tiết phòng, đặt lịch xem phòng và gửi yêu cầu thuê.
-- Người thuê trọ / Tenant: xem thông tin phòng đang thuê, hóa đơn, thanh toán, phản ánh sự cố và đánh giá.
+Một Web App tập trung, minh bạch, tự động hóa toàn bộ vòng đời thuê phòng — từ đăng tin → tìm kiếm → đặt lịch xem → ký hợp đồng → quản lý hóa đơn → thanh toán.
 
-## Cấu Trúc Thư Mục
+---
 
-```text
-apps/
-  web/
-    app/                    Next.js App Router routes
-    components/             Components dùng cho frontend
-    hooks/                  React hooks dùng chung trong frontend
-    lib/                    Tiện ích phía frontend
-    services/               Adapter gọi API hoặc service phía client
-    types/                  Type riêng của frontend
+## ✨ Tính Năng Nổi Bật
 
-  api/
-    src/
-      app.module.ts         Root module của NestJS
-      main.ts               Entry point backend
-      modules/              Các module nghiệp vụ dạng skeleton
+### 🔐 Xác thực & Phân quyền
+- Đăng ký / Đăng nhập bảo mật với mã hóa mật khẩu (Bcrypt)
+- Quản lý phiên đăng nhập bằng JWT (Access Token)
+- Phân quyền theo vai trò: Admin / Landlord / Tenant
+- Khôi phục mật khẩu qua Email (Nodemailer + Gmail)
+- Cập nhật hồ sơ cá nhân, đổi mật khẩu
 
-packages/
-  database/
-    prisma/
-      schema.prisma         Prisma schema ban đầu
-    generated/              Prisma Client sẽ được generate vào đây
+### 🏘️ Dành cho Chủ Trọ (Landlord)
+- Quản lý nhiều khu trọ / dãy trọ khác nhau
+- Quản lý phòng theo trạng thái thời gian thực (Trống / Đang thuê / Bảo trì)
+- Quản lý danh sách thiết bị, tiện nghi từng phòng
+- Duyệt yêu cầu thuê & ký hợp đồng với người thuê
+- Ghi chỉ số điện/nước hàng tháng cho từng phòng
+- Tự động tính và xuất hóa đơn điện tử
+- Xác nhận & theo dõi trạng thái thanh toán
+- Dashboard thống kê doanh thu, tỷ lệ lấp đầy phòng
+- Quản lý tiền đặt cọc
 
-  shared/
-    src/
-      constants/            Hằng số dùng chung
-      enums/                Enum/type dùng chung
-      types/                Type dùng chung
+### 🔍 Dành cho Người Tìm Phòng (Guest)
+- Xem danh sách phòng trọ đang trống công khai
+- Bộ lọc thông minh: khu vực, giá, diện tích, tiện ích
+- Xem chi tiết phòng: ảnh, mô tả, giá, vị trí bản đồ
+- Đặt lịch xem phòng trực tuyến
+- Gửi yêu cầu thuê phòng
 
-docs/                       Tài liệu dự án
+### 🏠 Dành cho Người Thuê (Tenant)
+- Dashboard tổng quan: hóa đơn cần thanh toán, thông tin phòng
+- Xem chi tiết hóa đơn minh bạch (số điện/nước đầu–cuối, đơn giá, thành tiền)
+- Lịch sử thanh toán theo tháng
+- Upload minh chứng thanh toán (chuyển khoản)
+- Phản ánh sự cố, yêu cầu sửa chữa
+- Đánh giá phòng và chủ trọ sau khi ở
 
-.env.example                Mẫu biến môi trường
-package.json                Script monorepo cấp root
-pnpm-workspace.yaml         Cấu hình pnpm workspace
-tsconfig.base.json          TypeScript config dùng chung
+### 🛡️ Dành cho Quản Trị Viên (Admin)
+- Dashboard tổng quan toàn hệ thống
+- Quản lý tài khoản người dùng (khóa / mở khóa)
+- Duyệt tài khoản chủ trọ
+- Quản lý bài đăng phòng trọ
+- Quản lý danh mục và gói dịch vụ
+- Xem báo cáo tổng hợp toàn nền tảng
+
+---
+
+## 🛠️ Công Nghệ Sử Dụng
+
+### Kiến trúc & Quản lý dự án
+
+| Công nghệ | Vai trò |
+|-----------|---------|
+| **pnpm Workspace** | Monorepo — quản lý nhiều app & package trong một repo |
+| **TypeScript** | Ngôn ngữ chính, đảm bảo type-safety toàn dự án |
+
+### Frontend
+
+| Công nghệ | Phiên bản | Vai trò |
+|-----------|-----------|---------|
+| **Next.js** | 15+ | Framework React, App Router, SSR/SSG |
+| **React** | 19 | UI library |
+| **TailwindCSS** | 4+ | Styling, responsive UI |
+| **Leaflet / React-Leaflet** | — | Bản đồ tương tác hiển thị vị trí phòng |
+
+### Backend
+
+| Công nghệ | Phiên bản | Vai trò |
+|-----------|-----------|---------|
+| **NestJS** | 11 | Framework Node.js, kiến trúc module hóa |
+| **TypeScript** | 5+ | Type-safe backend |
+| **JWT** | — | Xác thực & quản lý phiên |
+| **Bcrypt** | — | Mã hóa mật khẩu |
+| **Nodemailer** | — | Gửi email (OTP, thông báo) |
+| **Multer** | — | Xử lý upload file/ảnh |
+
+### Database
+
+| Công nghệ | Phiên bản | Vai trò |
+|-----------|-----------|---------|
+| **PostgreSQL** | — | Hệ quản trị CSDL chính |
+| **Neon** | — | Cloud Serverless PostgreSQL hosting |
+| **Prisma ORM** | 7 | Schema, migration, query builder |
+
+---
+
+## 🏗️ Kiến Trúc Hệ Thống
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                          │
+│                                                             │
+│   Browser ──► Next.js App (Port 3000)                       │
+│               App Router | SSR | TailwindCSS | Leaflet      │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ HTTP / REST API
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       SERVER LAYER                           │
+│                                                             │
+│   NestJS API Server (Port 3001)                             │
+│   Global Prefix: /api                                       │
+│                                                             │
+│   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│   │   Auth   │  │  Rooms   │  │ Invoices │  │  Users   │  │
+│   └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+│   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│   │Contracts │  │Payments  │  │  Issues  │  │ Reports  │  │
+│   └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ Prisma ORM
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      DATABASE LAYER                          │
+│                                                             │
+│   PostgreSQL (Neon Cloud)                                   │
+│   25+ tables | Migrations | Seed Data                       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Ứng Dụng Frontend
+---
 
-Frontend nằm tại:
+## 📁 Cấu Trúc Thư Mục
 
-```text
-apps/web
+```
+smart-rental-platform/
+│
+├── apps/
+│   ├── web/                          # 🌐 Frontend — Next.js App Router
+│   │   ├── app/
+│   │   │   ├── page.tsx              # Trang chủ / Landing page
+│   │   │   ├── auth/                 # Đăng nhập, Đăng ký, Quên mật khẩu
+│   │   │   ├── rooms/                # Danh sách & chi tiết phòng (public)
+│   │   │   ├── landlord/             # Khu vực Chủ trọ
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── properties/       # Quản lý khu trọ
+│   │   │   │   ├── rooms/            # Quản lý phòng
+│   │   │   │   ├── tenants/          # Quản lý người thuê
+│   │   │   │   ├── contracts/        # Hợp đồng
+│   │   │   │   ├── deposits/         # Đặt cọc
+│   │   │   │   ├── invoices/         # Hóa đơn
+│   │   │   │   ├── payments/         # Thanh toán
+│   │   │   │   └── reports/          # Báo cáo doanh thu
+│   │   │   ├── tenant/               # Khu vực Người thuê
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── my-room/          # Thông tin phòng đang thuê
+│   │   │   │   ├── invoices/         # Hóa đơn cá nhân
+│   │   │   │   ├── payments/         # Lịch sử thanh toán
+│   │   │   │   ├── issues/           # Phản ánh sự cố
+│   │   │   │   └── reviews/          # Đánh giá phòng
+│   │   │   ├── admin/                # Khu vực Admin
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── users/
+│   │   │   │   ├── landlords/
+│   │   │   │   ├── room-posts/
+│   │   │   │   ├── categories/
+│   │   │   │   ├── service-packages/
+│   │   │   │   └── reports/
+│   │   │   └── profile/              # Hồ sơ người dùng
+│   │   ├── components/               # Shared UI components
+│   │   ├── hooks/                    # Custom React hooks
+│   │   ├── lib/                      # Tiện ích phía client
+│   │   ├── services/                 # API client adapters
+│   │   └── types/                    # TypeScript types (frontend)
+│   │
+│   └── api/                          # ⚙️ Backend — NestJS
+│       └── src/
+│           ├── main.ts               # Entry point
+│           ├── app.module.ts         # Root module
+│           ├── common/               # Guards, interceptors, filters
+│           └── modules/              # Domain modules
+│               ├── auth/             # Xác thực, JWT
+│               ├── users/            # Tài khoản người dùng
+│               ├── landlords/        # Hồ sơ chủ trọ
+│               ├── tenants/          # Hồ sơ người thuê
+│               ├── properties/       # Khu trọ / nhà trọ
+│               ├── rooms/            # Phòng trọ
+│               ├── room-images/      # Ảnh phòng
+│               ├── amenities/        # Tiện nghi phòng
+│               ├── viewing-appointments/ # Lịch xem phòng
+│               ├── rental-requests/  # Yêu cầu thuê
+│               ├── contracts/        # Hợp đồng thuê
+│               ├── co-tenants/       # Người ở cùng
+│               ├── deposits/         # Đặt cọc
+│               ├── meter-readings/   # Chỉ số điện/nước
+│               ├── invoices/         # Hóa đơn
+│               ├── payments/         # Thanh toán
+│               ├── issues/           # Phản ánh sự cố
+│               ├── reviews/          # Đánh giá
+│               ├── notifications/    # Thông báo
+│               ├── service-packages/ # Gói dịch vụ
+│               ├── subscriptions/    # Đăng ký gói dịch vụ
+│               ├── reports/          # Báo cáo thống kê
+│               ├── uploads/          # Upload file/ảnh
+│               ├── regions/          # Khu vực địa lý
+│               ├── room-types/       # Loại phòng
+│               ├── roles/            # Vai trò hệ thống
+│               └── admin/            # Quản trị hệ thống
+│
+├── packages/
+│   ├── database/                     # 🗄️ Prisma schema & migrations
+│   │   └── prisma/
+│   │       ├── schema.prisma         # Data model (25+ models)
+│   │       ├── migrations/           # SQL migration history
+│   │       └── seed.cjs              # Dữ liệu khởi tạo mẫu
+│   │
+│   └── shared/                       # 📦 Shared constants, enums, types
+│       └── src/
+│           ├── constants/
+│           ├── enums/
+│           └── types/
+│
+├── docs/                             # 📄 Tài liệu dự án
+├── .env                              # Biến môi trường (không commit)
+├── .gitignore
+├── package.json                      # Root scripts (monorepo)
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
 ```
 
-Các route đang được scaffold bằng Next.js App Router. Mỗi page hiện chỉ là
-placeholder đơn giản để thể hiện cấu trúc điều hướng, chưa dựng UI chi tiết.
+---
 
-### Route Xác Thực
+## ⚙️ Yêu Cầu Môi Trường
 
-```text
-apps/web/app/auth/login/page.tsx
-apps/web/app/auth/register/page.tsx
-apps/web/app/auth/forgot-password/page.tsx
-```
+| Công cụ | Phiên bản tối thiểu |
+|---------|---------------------|
+| **Node.js** | >= 20.9.0 |
+| **pnpm** | >= 9.0.0 |
+| **PostgreSQL** | >= 14 (hoặc dùng Neon Cloud) |
 
-Các route này dành cho đăng nhập, đăng ký và quên mật khẩu.
+---
 
-### Route Phòng Trọ Công Khai
+## 🚀 Hướng Dẫn Cài Đặt & Chạy
 
-```text
-apps/web/app/rooms/page.tsx
-apps/web/app/rooms/[id]/page.tsx
-```
-
-Các route này dành cho danh sách phòng trọ và trang chi tiết phòng.
-
-### Không Gian Chủ Trọ
-
-```text
-apps/web/app/landlord/dashboard/page.tsx
-apps/web/app/landlord/properties/page.tsx
-apps/web/app/landlord/rooms/page.tsx
-apps/web/app/landlord/tenants/page.tsx
-apps/web/app/landlord/contracts/page.tsx
-apps/web/app/landlord/deposits/page.tsx
-apps/web/app/landlord/invoices/page.tsx
-apps/web/app/landlord/payments/page.tsx
-apps/web/app/landlord/reports/page.tsx
-```
-
-Khu vực này dành cho chủ trọ quản lý nhà trọ, phòng, người thuê, hợp đồng,
-đặt cọc, hóa đơn, thanh toán và báo cáo.
-
-### Không Gian Người Thuê
-
-```text
-apps/web/app/tenant/dashboard/page.tsx
-apps/web/app/tenant/my-room/page.tsx
-apps/web/app/tenant/invoices/page.tsx
-apps/web/app/tenant/payments/page.tsx
-apps/web/app/tenant/issues/page.tsx
-apps/web/app/tenant/reviews/page.tsx
-```
-
-Khu vực này dành cho người thuê xem phòng đang thuê, hóa đơn, thanh toán,
-gửi phản ánh sự cố và đánh giá phòng trọ.
-
-### Không Gian Admin
-
-```text
-apps/web/app/admin/dashboard/page.tsx
-apps/web/app/admin/users/page.tsx
-apps/web/app/admin/landlords/page.tsx
-apps/web/app/admin/room-posts/page.tsx
-apps/web/app/admin/categories/page.tsx
-apps/web/app/admin/service-packages/page.tsx
-apps/web/app/admin/reports/page.tsx
-```
-
-Khu vực này dành cho admin quản lý người dùng, chủ trọ, tin đăng, danh mục,
-gói dịch vụ và báo cáo tổng quan hệ thống.
-
-### Component Và Layer Phụ Trợ
-
-```text
-apps/web/components/common
-apps/web/components/layout
-apps/web/components/forms
-apps/web/components/tables
-apps/web/lib
-apps/web/hooks
-apps/web/services
-apps/web/types
-```
-
-Các thư mục này mới là khung ban đầu. Khi phát triển thật, nên tách component
-theo domain hoặc theo pattern đã thống nhất trong frontend.
-
-## Ứng Dụng Backend
-
-Backend nằm tại:
-
-```text
-apps/api
-```
-
-Ứng dụng backend dùng NestJS. Mỗi domain chính được scaffold thành một module
-riêng gồm:
-
-```text
-module.ts
-controller.ts
-service.ts
-dto/
-entities/
-```
-
-Các controller và service hiện chỉ là class rỗng theo chuẩn NestJS, chưa có
-endpoint hoặc logic nghiệp vụ.
-
-### Danh Sách Module Backend
-
-```text
-admin
-amenities
-auth
-co-tenants
-contracts
-deposits
-invoices
-issues
-landlords
-meter-readings
-notifications
-payments
-properties
-regions
-rental-requests
-reports
-reviews
-roles
-room-images
-room-types
-rooms
-service-packages
-subscriptions
-tenants
-uploads
-users
-viewing-appointments
-```
-
-Các module này phản ánh các nhóm chức năng chính của hệ thống:
-
-- Quản lý tài khoản và phân quyền.
-- Tìm kiếm và xem phòng trọ.
-- Quản lý nhà trọ, phòng trọ và hình ảnh phòng.
-- Đặt lịch xem phòng và gửi yêu cầu thuê.
-- Quản lý hợp đồng thuê phòng đã ký trực tiếp.
-- Quản lý người thuê và người ở cùng.
-- Quản lý đặt cọc.
-- Quản lý hóa đơn hàng tháng.
-- Quản lý thanh toán và minh chứng chuyển khoản.
-- Quản lý phản ánh, sự cố và yêu cầu sửa chữa.
-- Quản lý thông báo.
-- Quản lý đánh giá phòng trọ và chủ trọ.
-- Quản trị hệ thống.
-- Quản lý gói dịch vụ cho chủ trọ.
-- Thống kê và báo cáo.
-- Upload file hoặc hình ảnh.
-
-## Package Database
-
-Prisma schema nằm tại:
-
-```text
-packages/database/prisma/schema.prisma
-```
-
-Prisma Client sau khi generate sẽ nằm tại:
-
-```text
-packages/database/generated/client
-```
-
-Package database chịu trách nhiệm:
-
-- Lưu Prisma schema.
-- Generate Prisma Client.
-- Chạy migration.
-- Mở Prisma Studio khi cần kiểm tra dữ liệu.
-
-## Thiết Kế Prisma Schema Ban Đầu
-
-Schema hiện có các model chính:
-
-- `User`
-- `LandlordProfile`
-- `TenantProfile`
-- `Property`
-- `Room`
-- `RoomImage`
-- `Amenity`
-- `RoomAmenity`
-- `RoomType`
-- `Region`
-- `ViewingAppointment`
-- `RentalRequest`
-- `Contract`
-- `CoTenant`
-- `Deposit`
-- `Invoice`
-- `InvoiceItem`
-- `MeterReading`
-- `Payment`
-- `IssueReport`
-- `Notification`
-- `Review`
-- `ServicePackage`
-- `LandlordSubscription`
-- `PaymentMethod`
-
-Schema cũng có các enum nền tảng:
-
-- `Role`
-- `UserStatus`
-- `RoomStatus`
-- `AppointmentStatus`
-- `RentalRequestStatus`
-- `ContractStatus`
-- `DepositStatus`
-- `InvoiceStatus`
-- `PaymentStatus`
-- `IssueStatus`
-- `IssueType`
-- `SubscriptionStatus`
-
-### Một Số Quan Hệ Chính
-
-- `User` có thể có `LandlordProfile` hoặc `TenantProfile`.
-- `Property` thuộc về `LandlordProfile`.
-- `Room` thuộc về `Property`.
-- `Room` có nhiều `RoomImage`.
-- `Room` liên kết nhiều `Amenity` thông qua `RoomAmenity`.
-- `ViewingAppointment` gắn với `Room` và người tìm trọ.
-- `RentalRequest` gắn với `Room` và người gửi yêu cầu thuê.
-- `Contract` gắn với `Room`, `TenantProfile` và `LandlordProfile`.
-- `Invoice` gắn với `Contract`.
-- `Payment` gắn với `Invoice`.
-- `Deposit` có thể gắn với `RentalRequest` hoặc `Contract`.
-- `IssueReport` do tenant tạo và liên quan đến `Room` hoặc `Contract`.
-- `Review` do tenant tạo, liên quan đến `Room`, `LandlordProfile` và có thể gắn với `Contract`.
-- `LandlordSubscription` liên kết `LandlordProfile` với `ServicePackage`.
-
-### Ghi Chú Về Ràng Buộc Nghiệp Vụ
-
-Một số ràng buộc nghiệp vụ chưa nên hard-code trong schema ở giai đoạn
-skeleton:
-
-- Mỗi phòng tối thiểu 3 ảnh.
-- Số người ở không vượt quá `maxOccupants`.
-- Chỉ tenant đủ điều kiện mới được đánh giá.
-- Chủ trọ chỉ xác nhận thanh toán cho phòng thuộc quyền quản lý.
-- Logic tính tiền điện, nước, phí dịch vụ và tổng hóa đơn.
-
-Những phần này nên được xử lý ở service layer khi triển khai business logic.
-
-Riêng yêu cầu mỗi phòng tại một thời điểm chỉ nên có một hợp đồng active được
-chuẩn bị bằng trường `activeRoomId` nullable unique trong model `Contract`.
-Khi triển khai logic thật, service sẽ chỉ gán `activeRoomId` cho hợp đồng đang
-active của phòng.
-
-## Package Shared
-
-Package dùng chung nằm tại:
-
-```text
-packages/shared
-```
-
-Hiện package này mới chứa các hằng số, enum và type nền tảng. Về sau có thể
-dùng để chia sẻ:
-
-- Role và permission constants.
-- API response types.
-- DTO type dùng chung giữa frontend và backend nếu phù hợp.
-- Các enum domain không phụ thuộc trực tiếp Prisma.
-- Utility type dùng chung.
-
-## Biến Môi Trường
-
-File mẫu nằm tại:
-
-```text
-.env.example
-```
-
-Nội dung hiện tại:
-
-```env
-DATABASE_URL=
-DIRECT_URL=
-JWT_SECRET=
-NEXT_PUBLIC_API_URL=
-UPLOAD_DIR=
-```
-
-Ý nghĩa:
-
-- `DATABASE_URL`: connection string PostgreSQL dùng cho runtime, thường là pooled connection của Neon.
-- `DIRECT_URL`: direct connection string dùng cho Prisma migration.
-- `JWT_SECRET`: khóa ký token xác thực, sẽ dùng khi triển khai auth.
-- `NEXT_PUBLIC_API_URL`: URL backend để frontend gọi API.
-- `UPLOAD_DIR`: thư mục lưu file upload khi triển khai upload local hoặc adapter lưu trữ.
-
-Không commit file `.env` thật lên repository.
-
-## Cấu Hình Neon PostgreSQL
-
-Các bước cấu hình Neon sau này:
-
-1. Tạo project mới trên Neon.
-2. Tạo database PostgreSQL cho dự án.
-3. Lấy pooled connection string và gán vào `DATABASE_URL`.
-4. Lấy direct connection string và gán vào `DIRECT_URL`.
-5. Sao chép `.env.example` thành `.env`.
-6. Điền đầy đủ các biến môi trường.
-7. Chạy Prisma generate.
-8. Chạy migration đầu tiên khi schema đã được duyệt.
-
-Ví dụ dạng connection string:
-
-```env
-DATABASE_URL="postgresql://user:password@host-pooler.region.aws.neon.tech/dbname?sslmode=require"
-DIRECT_URL="postgresql://user:password@host.region.aws.neon.tech/dbname?sslmode=require"
-```
-
-Không dùng giá trị ví dụ trên cho môi trường thật.
-
-## Cài Đặt Dependencies
-
-Dự án dùng `pnpm`. Sau khi máy có `pnpm`, chạy:
+### Bước 1: Clone repository
 
 ```bash
-pnpm install
+git clone https://github.com/<your-org>/smart-rental-platform.git
+cd smart-rental-platform
 ```
 
-Nếu máy chưa có `pnpm`, có thể bật qua Corepack:
+### Bước 2: Cài đặt pnpm (nếu chưa có)
 
 ```bash
 corepack enable
 corepack prepare pnpm@9.15.0 --activate
 ```
 
-Sau đó cài lại dependencies:
+Hoặc cài qua npm:
+
+```bash
+npm install -g pnpm
+```
+
+### Bước 3: Cài đặt dependencies
 
 ```bash
 pnpm install
 ```
 
-## Script Cấp Root
-
-Các script chính trong `package.json` cấp root:
+### Bước 4: Cấu hình biến môi trường
 
 ```bash
-pnpm dev
-pnpm build
-pnpm typecheck
+cp .env.example .env
+```
+
+Mở file `.env` và điền đầy đủ các giá trị (xem chi tiết ở [phần Biến môi trường](#-biến-môi-trường)).
+
+### Bước 5: Khởi tạo database
+
+```bash
+# Generate Prisma Client
 pnpm db:generate
+
+# Chạy migration tạo bảng
 pnpm db:migrate
-pnpm db:studio
+
+# (Tùy chọn) Seed dữ liệu mẫu
+pnpm db:seed
 ```
 
-Ý nghĩa:
-
-- `pnpm dev`: chạy các app có script `dev`.
-- `pnpm build`: build các package/app có script `build`.
-- `pnpm typecheck`: kiểm tra TypeScript.
-- `pnpm db:generate`: generate Prisma Client.
-- `pnpm db:migrate`: chạy Prisma migrate dev.
-- `pnpm db:studio`: mở Prisma Studio.
-
-## Chạy Frontend
-
-Sau khi cài dependencies:
+### Bước 6: Chạy ứng dụng
 
 ```bash
+# Chạy cả Frontend lẫn Backend cùng lúc
+pnpm dev
+```
+
+Hoặc chạy riêng lẻ:
+
+```bash
+# Chỉ chạy Frontend
 pnpm --filter @smart-rental/web dev
-```
 
-Mặc định Next.js sẽ chạy ở:
-
-```text
-http://localhost:3000
-```
-
-Frontend hiện chỉ hiển thị các page placeholder.
-
-## Chạy Backend
-
-Sau khi cài dependencies:
-
-```bash
+# Chỉ chạy Backend
 pnpm --filter @smart-rental/api dev
 ```
 
-Backend mặc định lắng nghe ở port `3001` nếu không cấu hình `PORT`.
-Global prefix hiện là:
+| Ứng dụng | URL |
+|----------|-----|
+| **Frontend (Next.js)** | http://localhost:3000 |
+| **Backend API (NestJS)** | http://localhost:3001/api |
 
-```text
-/api
+---
+
+## 🔑 Biến Môi Trường
+
+Tạo file `.env` tại thư mục gốc `smart-rental-platform/` với nội dung sau:
+
+```env
+# =============================================
+# DATABASE
+# =============================================
+# Pooled connection — dùng cho Prisma runtime (Neon)
+DATABASE_URL="postgresql://USER:PASSWORD@HOST-pooler.REGION.aws.neon.tech/DBNAME?sslmode=require"
+
+# Direct connection — dùng cho Prisma Migrate
+DIRECT_URL="postgresql://USER:PASSWORD@HOST.REGION.aws.neon.tech/DBNAME?sslmode=require"
+
+# =============================================
+# AUTHENTICATION
+# =============================================
+JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+JWT_EXPIRES_IN="7d"
+
+# =============================================
+# EMAIL (Nodemailer + Gmail)
+# =============================================
+MAIL_HOST="smtp.gmail.com"
+MAIL_PORT=587
+MAIL_USER="your-gmail@gmail.com"
+MAIL_PASS="your-gmail-app-password"
+MAIL_FROM="Smart Rental <your-gmail@gmail.com>"
+
+# =============================================
+# API URL (dùng cho Frontend gọi Backend)
+# =============================================
+NEXT_PUBLIC_API_URL="http://localhost:3001"
+
+# =============================================
+# FILE UPLOAD
+# =============================================
+UPLOAD_DIR="uploads"
 ```
 
-Backend hiện chưa có endpoint nghiệp vụ thật.
+> ⚠️ **Lưu ý bảo mật:** Không bao giờ commit file `.env` lên repository. File này đã được thêm vào `.gitignore`.
 
-## Làm Việc Với Prisma
+> 📌 **Gmail App Password:** Truy cập https://myaccount.google.com/apppasswords để tạo App Password riêng (không dùng mật khẩu Gmail thông thường).
 
-Generate Prisma Client:
+---
+
+## 🗄️ Database & Prisma
+
+### Mô hình dữ liệu
+
+Schema được thiết kế với **25+ model** bao gồm:
+
+**Tài khoản & Phân quyền**
+- `User`, `LandlordProfile`, `TenantProfile`
+
+**Bất động sản**
+- `Property`, `Room`, `RoomImage`, `Amenity`, `RoomAmenity`, `RoomType`, `Region`
+
+**Quy trình thuê**
+- `ViewingAppointment`, `RentalRequest`, `Contract`, `CoTenant`
+
+**Tài chính**
+- `Deposit`, `Invoice`, `InvoiceItem`, `MeterReading`, `Payment`, `PaymentMethod`
+
+**Vận hành**
+- `IssueReport`, `Notification`, `Review`
+
+**Dịch vụ**
+- `ServicePackage`, `LandlordSubscription`
+
+### Các lệnh Prisma thường dùng
 
 ```bash
+# Generate Prisma Client
 pnpm db:generate
-```
 
-Format Prisma schema:
+# Tạo và chạy migration mới
+pnpm db:migrate
 
-```bash
+# Seed dữ liệu mẫu
+pnpm db:seed
+
+# Mở Prisma Studio (giao diện quản lý DB trực quan)
+pnpm db:studio
+
+# Format Prisma schema
 pnpm --filter @smart-rental/database prisma:format
 ```
 
-Chạy migration đầu tiên:
+---
+
+## 📜 Các Lệnh Thường Dùng
 
 ```bash
-pnpm --filter @smart-rental/database prisma:migrate:dev -- --name init
+# Chạy toàn bộ dự án (dev mode)
+pnpm dev
+
+# Build toàn bộ dự án
+pnpm build
+
+# Kiểm tra TypeScript
+pnpm typecheck
+
+# Lint toàn bộ dự án
+pnpm lint
+
+# Database
+pnpm db:generate    # Generate Prisma Client
+pnpm db:migrate     # Chạy migration
+pnpm db:seed        # Seed dữ liệu mẫu
+pnpm db:studio      # Mở Prisma Studio
 ```
 
-Mở Prisma Studio:
+---
 
-```bash
-pnpm db:studio
+## 👥 Vai Trò Người Dùng
+
+### 🔍 Guest — Người Tìm Phòng
+Người dùng chưa đăng nhập, có thể:
+- Xem danh sách phòng trọ đang trống
+- Lọc theo khu vực, giá, tiện ích
+- Xem chi tiết phòng, hình ảnh, vị trí bản đồ
+- **Cần đăng nhập** để đặt lịch xem phòng hoặc gửi yêu cầu thuê
+
+### 🏠 Tenant — Người Thuê
+Người dùng đã ký hợp đồng thuê phòng:
+- Xem thông tin phòng đang thuê và tiện nghi
+- Tra cứu hóa đơn chi tiết hàng tháng
+- Upload minh chứng thanh toán
+- Gửi yêu cầu sửa chữa, phản ánh sự cố
+- Đánh giá phòng và chủ trọ
+
+### 🏘️ Landlord — Chủ Trọ
+Người dùng đã được Admin duyệt tài khoản:
+- Quản lý toàn bộ khu trọ và phòng
+- Xem yêu cầu thuê và duyệt hợp đồng
+- Ghi chỉ số điện/nước, tạo hóa đơn tự động
+- Xác nhận thanh toán, quản lý đặt cọc
+- Xem dashboard doanh thu, báo cáo thống kê
+
+### 🛡️ Admin — Quản Trị Viên
+Quản trị toàn bộ nền tảng:
+- Xem tổng quan hệ thống (users, landlords, properties)
+- Duyệt và quản lý tài khoản chủ trọ
+- Khóa/mở khóa tài khoản vi phạm
+- Quản lý danh mục, gói dịch vụ
+- Xem báo cáo toàn nền tảng
+
+---
+
+## 🔄 Luồng Nghiệp Vụ Chính
+
+### Luồng thuê phòng
+
+```
+Guest xem danh sách phòng
+    └─► Đặt lịch xem phòng
+        └─► Gửi yêu cầu thuê
+            └─► Landlord duyệt yêu cầu
+                └─► Ký hợp đồng thuê
+                    └─► Tenant được cấp tài khoản Tenant
 ```
 
-Nên chạy migration sau khi:
+### Luồng thanh toán hàng tháng
 
-- Đã cấu hình đúng `DATABASE_URL`.
-- Đã cấu hình đúng `DIRECT_URL`.
-- Đã review schema.
-- Đã thống nhất naming convention cho các model quan trọng.
+```
+Landlord ghi chỉ số điện/nước
+    └─► Hệ thống tự tính hóa đơn
+        (Tiền phòng + Điện + Nước + Phí dịch vụ)
+        └─► Tenant nhận thông báo hóa đơn
+            └─► Tenant xem chi tiết & chuyển khoản
+                └─► Upload minh chứng thanh toán
+                    └─► Landlord xác nhận
+                        └─► Hóa đơn đánh dấu "Đã thanh toán"
+```
 
-## Quy Ước Phát Triển Đề Xuất
+---
 
-- Giữ module backend theo domain, tránh dồn logic vào một service lớn.
-- DTO đặt trong `dto/`.
-- Entity hoặc type riêng của module đặt trong `entities/` hoặc `types/`.
-- Không hard-code dữ liệu mẫu trong source code.
-- Không đưa business logic vào controller.
-- Controller chỉ nhận request, validate, gọi service và trả response.
-- Service chịu trách nhiệm điều phối nghiệp vụ.
-- Database access nên đi qua provider/service riêng khi triển khai Prisma trong NestJS.
-- Frontend nên tách component dùng chung và component theo domain.
-- Các route admin, landlord và tenant nên có guard/permission khi triển khai auth.
+## 📊 Mô Hình Dữ Liệu (ERD Tóm Tắt)
 
-## Hướng Phát Triển Tiếp Theo
+```
+User ──── LandlordProfile ──── Property ──── Room
+ │                                            │
+ └─── TenantProfile ─────── Contract ────────┤
+                                 │            │
+                              Invoice      RoomImage
+                                 │
+                              Payment
+```
 
-Các bước hợp lý sau skeleton:
+---
 
-1. Cài dependencies bằng `pnpm install`.
-2. Thêm Prisma module/service cho NestJS backend.
-3. Chạy `pnpm db:generate`.
-4. Validate và format Prisma schema.
-5. Cấu hình Neon PostgreSQL.
-6. Chạy migration đầu tiên.
-7. Thiết kế authentication flow.
-8. Thêm role-based access control.
-9. Xây dựng API cho từng domain theo mức ưu tiên.
-10. Xây dựng layout frontend cho từng vai trò.
-11. Thêm validation, logging, error handling và test.
+## 👨‍💻 Nhóm Phát Triển
 
-## Lưu Ý Quan Trọng
+**Nhóm 7** — Đồ án môn học
 
-Repository này cố ý chưa triển khai UI hoàn chỉnh, backend logic hoặc seed data.
-Mọi file hiện tại được tạo nhằm làm nền tảng kiến trúc ban đầu, giúp dự án dễ
-mở rộng, dễ phân chia module và dễ phát triển theo từng giai đoạn.
+| STT | Họ và Tên | MSSV | Vai trò |
+|-----|-----------|------|---------|
+| 1 | *(Thành viên 1)* | — | Frontend & Backend |
+| 2 | *(Thành viên 2)* | — | Frontend & Backend |
+| 3 | *(Thành viên 3)* | — | Frontend & Backend |
+| 4 | *(Thành viên 4)* | — | Database & Backend |
+| 5 | *(Thành viên 5)* | — | Frontend & Docs |
+
+> 📝 Cập nhật danh sách thành viên thực tế vào bảng trên.
+
+---
+
+## 📄 License
+
+Dự án này được phát triển phục vụ mục đích học thuật trong khuôn khổ đồ án môn học.  
+© 2026 Nhóm 7. All rights reserved.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by Nhóm 7 | Smart Rental Platform</sub>
+</div>
