@@ -1,4 +1,4 @@
-# 🏠 Smart Rental Platform — Nền Tảng Quản Lý Phòng Trọ Thông Minh
+# 🏠 Smart Rental Platform — Nền Tảng Quản Lý Phòng Cho Thuê Thông Minh
 
 > **Đồ án môn học | Nhóm 7**  
 > Hệ thống Web App toàn diện, số hóa và tự động hóa toàn bộ quy trình cho thuê phòng trọ — từ tìm kiếm phòng, quản lý hợp đồng, tính hóa đơn điện/nước đến theo dõi thanh toán.
